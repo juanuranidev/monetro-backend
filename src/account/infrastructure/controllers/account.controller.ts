@@ -17,7 +17,7 @@ import {
 import type { RequestUser } from '../../../core/strategies/jwt.strategy';
 import { CurrentUser } from '../../../user/infrastructure/decorators/current-user.decorator';
 import { CreateAccountRequestDto } from '../../application/dtos/request/create-account-request.dto';
-import { AccountResponseDto } from '../../application/dtos/response/entity/account-response.dto';
+import { AccountEntityDto } from '../../application/dtos/entity/account-entity.dto';
 import { CreateAccountUseCase } from '../../application/use-cases/create-account/create-account.use-case';
 
 @ApiTags('accounts')
@@ -41,11 +41,11 @@ export class AccountController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new account for the current user' })
   @ApiBody({ type: CreateAccountRequestDto })
-  @ApiCreatedResponse({ type: AccountResponseDto })
+  @ApiCreatedResponse({ type: AccountEntityDto })
   public create(
     @CurrentUser() user: RequestUser,
     @Body() body: CreateAccountRequestDto,
-  ): Promise<AccountResponseDto> {
+  ): Promise<AccountEntityDto> {
     return this.createAccountUseCase.execute(user.userId, body);
   }
 }

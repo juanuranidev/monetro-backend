@@ -8,7 +8,7 @@ import { Rule } from '../../../domain/entities/rule';
 import { RULE_REPOSITORY } from '../../../domain/rule-repository.token';
 import type { IRuleRepository } from '../../../domain/ports/i-rule-repository';
 import type { CreateRuleRequestDto } from '../../dtos/request/create-rule-request.dto';
-import { RuleResponseDto } from '../../dtos/response/entity/rule-response.dto';
+import { RuleEntityDto } from '../../dtos/entity/rule-entity.dto';
 
 @Injectable()
 export class CreateRuleUseCase {
@@ -24,7 +24,7 @@ export class CreateRuleUseCase {
   public async execute(
     userId: string,
     input: CreateRuleRequestDto,
-  ): Promise<RuleResponseDto> {
+  ): Promise<RuleEntityDto> {
     const category = await this.categoryRepository.findAccessibleByUser(
       input.targetCategoryId,
       userId,
@@ -47,7 +47,7 @@ export class CreateRuleUseCase {
       userId,
     );
     const saved: Rule = await this.ruleRepository.create(rule);
-    return new RuleResponseDto(
+    return new RuleEntityDto(
       saved.id,
       saved.pattern,
       saved.targetCategoryId,

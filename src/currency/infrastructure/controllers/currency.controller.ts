@@ -5,7 +5,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrencyResponseDto } from '../../application/dtos/response/entity/currency-response.dto';
+import { CurrencyEntityDto } from '../../application/dtos/entity/currency-entity.dto';
 import { ListCurrenciesUseCase } from '../../application/use-cases/list-currencies/list-currencies.use-case';
 
 @ApiTags('currencies')
@@ -27,8 +27,8 @@ export class CurrencyController {
 
   @Get()
   @ApiOperation({ summary: 'List all currencies' })
-  @ApiOkResponse({ type: CurrencyResponseDto, isArray: true })
-  public list(): Promise<CurrencyResponseDto[]> {
+  @ApiOkResponse({ type: CurrencyEntityDto, isArray: true })
+  public list(): Promise<CurrencyEntityDto[]> {
     return this.listCurrenciesUseCase.execute();
   }
 }

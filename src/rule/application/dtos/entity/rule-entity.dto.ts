@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RuleResponseDto {
+export class RuleEntityDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 

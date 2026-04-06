@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CurrencyResponseDto {
+export class CurrencyEntityDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 

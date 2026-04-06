@@ -5,7 +5,7 @@ import { CURRENCY_REPOSITORY } from '../../../../currency/domain/currency-reposi
 import { Account } from '../../../domain/entities/account';
 import { ACCOUNT_REPOSITORY } from '../../../domain/account-repository.token';
 import type { IAccountRepository } from '../../../domain/ports/interface-account-repository';
-import { AccountResponseDto } from '../../dtos/response/entity/account-response.dto';
+import { AccountEntityDto } from '../../dtos/entity/account-entity.dto';
 import type { CreateAccountRequestDto } from '../../dtos/request/create-account-request.dto';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class CreateAccountUseCase {
   public async execute(
     userId: string,
     input: CreateAccountRequestDto,
-  ): Promise<AccountResponseDto> {
+  ): Promise<AccountEntityDto> {
     const currency = await this.currencyRepository.findByCode(
       input.currencyCode.toUpperCase(),
     );
@@ -38,7 +38,7 @@ export class CreateAccountUseCase {
       userId,
     );
     const saved: Account = await this.accountRepository.create(account);
-    return new AccountResponseDto(
+    return new AccountEntityDto(
       saved.id,
       saved.name,
       saved.identifier,

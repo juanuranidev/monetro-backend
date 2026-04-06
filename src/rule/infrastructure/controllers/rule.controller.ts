@@ -17,7 +17,7 @@ import {
 import type { RequestUser } from '../../../core/strategies/jwt.strategy';
 import { CurrentUser } from '../../../user/infrastructure/decorators/current-user.decorator';
 import { CreateRuleRequestDto } from '../../application/dtos/request/create-rule-request.dto';
-import { RuleResponseDto } from '../../application/dtos/response/entity/rule-response.dto';
+import { RuleEntityDto } from '../../application/dtos/entity/rule-entity.dto';
 import { CreateRuleUseCase } from '../../application/use-cases/create-rule/create-rule.use-case';
 
 @ApiTags('rules')
@@ -39,11 +39,11 @@ export class RuleController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a categorization rule' })
   @ApiBody({ type: CreateRuleRequestDto })
-  @ApiCreatedResponse({ type: RuleResponseDto })
+  @ApiCreatedResponse({ type: RuleEntityDto })
   public create(
     @CurrentUser() user: RequestUser,
     @Body() body: CreateRuleRequestDto,
-  ): Promise<RuleResponseDto> {
+  ): Promise<RuleEntityDto> {
     return this.createRuleUseCase.execute(user.userId, body);
   }
 }

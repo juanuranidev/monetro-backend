@@ -13,7 +13,7 @@ import { TRANSACTION_TYPE_REPOSITORY } from '../../../domain/transaction-type-re
 import type { ITransactionRepository } from '../../../domain/ports/i-transaction-repository';
 import type { ITransactionTypeRepository } from '../../../domain/ports/i-transaction-type-repository';
 import type { CreateTransactionRequestDto } from '../../dtos/request/create-transaction-request.dto';
-import { TransactionResponseDto } from '../../dtos/response/entity/transaction-response.dto';
+import { TransactionEntityDto } from '../../dtos/entity/transaction-entity.dto';
 
 @Injectable()
 export class CreateTransactionUseCase {
@@ -33,7 +33,7 @@ export class CreateTransactionUseCase {
   public async execute(
     userId: string,
     input: CreateTransactionRequestDto,
-  ): Promise<TransactionResponseDto> {
+  ): Promise<TransactionEntityDto> {
     const category = await this.categoryRepository.findAccessibleByUser(
       input.categoryId,
       userId,
@@ -90,7 +90,7 @@ export class CreateTransactionUseCase {
     );
     const saved: Transaction =
       await this.transactionRepository.create(transaction);
-    return new TransactionResponseDto(
+    return new TransactionEntityDto(
       saved.id,
       saved.amount.toPersistenceString(),
       saved.description,

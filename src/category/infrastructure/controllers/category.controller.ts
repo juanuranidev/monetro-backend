@@ -17,7 +17,7 @@ import {
 import type { RequestUser } from '../../../core/strategies/jwt.strategy';
 import { CurrentUser } from '../../../user/infrastructure/decorators/current-user.decorator';
 import { CreateCategoryRequestDto } from '../../application/dtos/request/create-category-request.dto';
-import { CategoryResponseDto } from '../../application/dtos/response/entity/category-response.dto';
+import { CategoryEntityDto } from '../../application/dtos/entity/category-entity.dto';
 import { CreateCategoryUseCase } from '../../application/use-cases/create-category/create-category.use-case';
 
 @ApiTags('categories')
@@ -41,11 +41,11 @@ export class CategoryController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a category for the current user' })
   @ApiBody({ type: CreateCategoryRequestDto })
-  @ApiCreatedResponse({ type: CategoryResponseDto })
+  @ApiCreatedResponse({ type: CategoryEntityDto })
   public create(
     @CurrentUser() user: RequestUser,
     @Body() body: CreateCategoryRequestDto,
-  ): Promise<CategoryResponseDto> {
+  ): Promise<CategoryEntityDto> {
     return this.createCategoryUseCase.execute(user.userId, body);
   }
 }

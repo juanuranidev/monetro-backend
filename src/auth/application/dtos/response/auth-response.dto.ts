@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthUserSummaryDto } from './entity/auth-user-summary.dto';
+import { UserEntityDto } from '../entity/user-entity.dto';
 
 export class AuthResponseDto {
   @ApiProperty()
   public accessToken!: string;
 
-  @ApiProperty({ type: AuthUserSummaryDto })
-  public user!: AuthUserSummaryDto;
+  @ApiProperty({ type: UserEntityDto })
+  public user!: UserEntityDto;
 }

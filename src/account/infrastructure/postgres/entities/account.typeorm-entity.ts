@@ -38,9 +38,10 @@ export class AccountTypeOrmEntity {
   @RelationId((account: AccountTypeOrmEntity) => account.currency)
   public currencyId!: string;
 
-  @ManyToOne(() => UserTypeOrmEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserTypeOrmEntity, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'user_id' })
   public user!: UserTypeOrmEntity;
+  b;
 
   @RelationId((account: AccountTypeOrmEntity) => account.user)
   public userId!: string;

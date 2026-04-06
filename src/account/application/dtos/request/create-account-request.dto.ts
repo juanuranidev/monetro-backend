@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  Length,
+  IsString,
+  MinLength,
   IsBoolean,
   IsOptional,
-  IsString,
-  Length,
-  MinLength,
 } from 'class-validator';
 
 export class CreateAccountRequestDto {

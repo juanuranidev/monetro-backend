@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ICurrencyRepository } from '../../../domain/ports/i-currency-repository';
 import { CURRENCY_REPOSITORY } from '../../../domain/currency-repository.token';
-import { CurrencyResponseDto } from '../../dtos/response/entity/currency-response.dto';
+import { CurrencyEntityDto } from '../../dtos/entity/currency-entity.dto';
 
 @Injectable()
 export class ListCurrenciesUseCase {
@@ -10,10 +10,10 @@ export class ListCurrenciesUseCase {
     private readonly currencyRepository: ICurrencyRepository,
   ) {}
 
-  public async execute(): Promise<CurrencyResponseDto[]> {
+  public async execute(): Promise<CurrencyEntityDto[]> {
     const currencies = await this.currencyRepository.findAll();
     return currencies.map(
-      (c) => new CurrencyResponseDto(c.id, c.code, c.symbol, c.name),
+      (c) => new CurrencyEntityDto(c.id, c.code, c.symbol, c.name),
     );
   }
 }

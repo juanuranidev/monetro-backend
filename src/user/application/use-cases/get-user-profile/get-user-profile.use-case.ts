@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { IUserRepository } from '../../../domain/ports/i-user-repository';
 import { USER_REPOSITORY } from '../../../domain/user-repository.token';
-import { UserProfileResponseDto } from '../../dtos/response/entity/user-profile-response.dto';
+import { UserEntityDto } from '../../dtos/entity/user-entity.dto';
 
 @Injectable()
 export class GetUserProfileUseCase {
@@ -10,12 +10,12 @@ export class GetUserProfileUseCase {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  public async execute(userId: string): Promise<UserProfileResponseDto> {
+  public async execute(userId: string): Promise<UserEntityDto> {
     const user = await this.userRepository.findById(userId);
     if (user === undefined) {
       throw new NotFoundException('User not found');
     }
-    return new UserProfileResponseDto(
+    return new UserEntityDto(
       user.id,
       user.name,
       user.email,

@@ -1,36 +1,39 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CategoryResponseDto {
+export class AccountEntityDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
   @ApiProperty()
   public name!: string;
 
+  @ApiProperty()
+  public identifier!: string;
+
   @ApiPropertyOptional()
   public icon?: string;
 
   @ApiProperty()
-  public isDefault!: boolean;
+  public excludeFromStats!: boolean;
 
-  @ApiPropertyOptional({ format: 'uuid' })
-  public userId?: string;
+  @ApiProperty({ format: 'uuid' })
+  public currencyId!: string;
 
   public constructor(
     id: string,
     name: string,
+    identifier: string,
     icon: string | undefined,
-    isDefault: boolean,
-    userId: string | undefined,
+    excludeFromStats: boolean,
+    currencyId: string,
   ) {
     this.id = id;
     this.name = name;
+    this.identifier = identifier;
     if (icon !== undefined) {
       this.icon = icon;
     }
-    this.isDefault = isDefault;
-    if (userId !== undefined) {
-      this.userId = userId;
-    }
+    this.excludeFromStats = excludeFromStats;
+    this.currencyId = currencyId;
   }
 }

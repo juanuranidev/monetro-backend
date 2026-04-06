@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { Category } from '../../../domain/entities/category';
 import { CATEGORY_REPOSITORY } from '../../../domain/category-repository.token';
 import type { ICategoryRepository } from '../../../domain/ports/i-category-repository';
-import { CategoryResponseDto } from '../../dtos/response/entity/category-response.dto';
+import { CategoryEntityDto } from '../../dtos/entity/category-entity.dto';
 import type { CreateCategoryRequestDto } from '../../dtos/request/create-category-request.dto';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class CreateCategoryUseCase {
   public async execute(
     userId: string,
     input: CreateCategoryRequestDto,
-  ): Promise<CategoryResponseDto> {
+  ): Promise<CategoryEntityDto> {
     const isDefault: boolean = input.isDefault ?? false;
     const category: Category = new Category(
       randomUUID(),
@@ -26,7 +26,7 @@ export class CreateCategoryUseCase {
       userId,
     );
     const saved: Category = await this.categoryRepository.create(category);
-    return new CategoryResponseDto(
+    return new CategoryEntityDto(
       saved.id,
       saved.name,
       saved.icon,
