@@ -2,10 +2,13 @@ import { User } from '../../../domain/entities/user';
 import { UserTypeOrmEntity } from '../entities/user.typeorm-entity';
 
 /**
- * Maps between domain User and TypeORM user row.
+ * Maps between domain User and Postgres-backed persistence (TypeORM).
  */
 export class UserMapper {
-  public static toDomain(entity: UserTypeOrmEntity): User {
+  /**
+   * Maps a Postgres-backed user row (TypeORM entity) to the domain model.
+   */
+  public static fromPostgresToDomain(entity: UserTypeOrmEntity): User {
     return new User(
       entity.id,
       entity.name,
@@ -16,7 +19,10 @@ export class UserMapper {
     );
   }
 
-  public static toPersistence(domain: User): Partial<UserTypeOrmEntity> {
+  /**
+   * Maps a domain user to fields for a Postgres row (TypeORM insert/update).
+   */
+  public static fromDomainToPostgresRow(domain: User): Partial<UserTypeOrmEntity> {
     return {
       id: domain.id,
       name: domain.name,

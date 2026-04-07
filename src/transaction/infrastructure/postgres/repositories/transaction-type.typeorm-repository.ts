@@ -18,6 +18,6 @@ export class TransactionTypeTypeOrmRepository implements ITransactionTypeReposit
       await this.repository.findOne({
         where: { code: code.toUpperCase() },
       });
-    return row === null ? undefined : TransactionTypeMapper.toDomain(row);
+    return row === null ? undefined : TransactionTypeMapper.fromPostgresToDomain(row);
   }
 }

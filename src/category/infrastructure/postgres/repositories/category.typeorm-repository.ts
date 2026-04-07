@@ -15,16 +15,16 @@ export class CategoryTypeOrmRepository implements ICategoryRepository {
 
   public async create(domain: Category): Promise<Category> {
     const entity: CategoryTypeOrmEntity = this.repository.create(
-      CategoryMapper.toNewRow({
+      CategoryMapper.fromCategoryFieldsToPostgresRowPartial({
         id: domain.id,
         name: domain.name,
         icon: domain.icon,
         isDefault: domain.isDefault,
         userId: domain.userId,
-      }) as CategoryTypeOrmEntity,
+      }),
     );
     const saved: CategoryTypeOrmEntity = await this.repository.save(entity);
-    return CategoryMapper.toDomain(saved);
+    return CategoryMapper.fromPostgresToDomain(saved);
   }
 
   public async findAccessibleByUser(
@@ -36,6 +36,6 @@ export class CategoryTypeOrmRepository implements ICategoryRepository {
       .where('c.id = :categoryId', { categoryId })
       .andWhere('(c.user_id IS NULL OR c.user_id = :userId)', { userId })
       .getOne();
-    return row === null ? undefined : CategoryMapper.toDomain(row);
+    return row === null ? undefined : CategoryMapper.fromPostgresToDomain(row);
   }
 }

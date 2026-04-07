@@ -41,7 +41,6 @@ export class AccountTypeOrmEntity {
   @ManyToOne(() => UserTypeOrmEntity, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'user_id' })
   public user!: UserTypeOrmEntity;
-  b;
 
   @RelationId((account: AccountTypeOrmEntity) => account.user)
   public userId!: string;

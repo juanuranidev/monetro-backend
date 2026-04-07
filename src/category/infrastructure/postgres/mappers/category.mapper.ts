@@ -2,7 +2,10 @@ import { Category } from '../../../domain/entities/category';
 import { CategoryTypeOrmEntity } from '../entities/category.typeorm-entity';
 
 export class CategoryMapper {
-  public static toDomain(entity: CategoryTypeOrmEntity): Category {
+  /**
+   * Maps a Postgres-backed category row (TypeORM entity) to the domain model.
+   */
+  public static fromPostgresToDomain(entity: CategoryTypeOrmEntity): Category {
     return new Category(
       entity.id,
       entity.name,
@@ -12,7 +15,10 @@ export class CategoryMapper {
     );
   }
 
-  public static toNewRow(input: {
+  /**
+   * Maps explicit category fields (e.g. on create) to a partial Postgres row for TypeORM.
+   */
+  public static fromCategoryFieldsToPostgresRowPartial(input: {
     readonly id: string;
     readonly name: string;
     readonly icon: string | undefined;

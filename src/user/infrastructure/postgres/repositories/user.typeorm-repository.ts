@@ -17,14 +17,14 @@ export class UserTypeOrmRepository implements IUserRepository {
     const row: UserTypeOrmEntity | null = await this.repository.findOne({
       where: { id },
     });
-    return row === null ? undefined : UserMapper.toDomain(row);
+    return row === null ? undefined : UserMapper.fromPostgresToDomain(row);
   }
 
   public async findByEmail(email: string): Promise<User | undefined> {
     const row: UserTypeOrmEntity | null = await this.repository.findOne({
       where: { email: email.toLowerCase() },
     });
-    return row === null ? undefined : UserMapper.toDomain(row);
+    return row === null ? undefined : UserMapper.fromPostgresToDomain(row);
   }
 
   public async existsByEmail(email: string): Promise<boolean> {
@@ -36,9 +36,9 @@ export class UserTypeOrmRepository implements IUserRepository {
 
   public async create(user: User): Promise<User> {
     const entity: UserTypeOrmEntity = this.repository.create(
-      UserMapper.toPersistence(user) as UserTypeOrmEntity,
+      UserMapper.fromDomainToPostgresRow(user),
     );
     const saved: UserTypeOrmEntity = await this.repository.save(entity);
-    return UserMapper.toDomain(saved);
+    return UserMapper.fromPostgresToDomain(saved);
   }
 }
