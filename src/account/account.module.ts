@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CurrencyModule } from '@currency/currency.module';
-import { CreateAccountUseCase } from '@account/application/use-cases/create-account/create-account.use-case';
-import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
+
 import { AccountController } from '@account/infrastructure/controllers/account.controller';
+import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
+import { CreateAccountUseCase } from '@account/application/use-cases/create-account/create-account.use-case';
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
 import { AccountTypeOrmRepository } from '@account/infrastructure/postgres/repositories/account.typeorm-repository';
+
+import { CurrencyModule } from '@currency/currency.module';
 
 /**
  * Relational storage via TypeORM under infrastructure/postgres (PostgreSQL in

@@ -1,24 +1,27 @@
 import {
-  Body,
-  Controller,
   Get,
-  HttpCode,
-  HttpStatus,
+  Body,
   Post,
+  HttpCode,
+  Controller,
+  HttpStatus,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
-import type { RequestUser } from '@core/strategies/jwt.strategy';
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
-import { CreateAccountRequestDto } from '@account/application/dtos/request/create-account-request.dto';
+
 import { AccountEntityDto } from '@account/application/dtos/entity/account-entity.dto';
 import { CreateAccountUseCase } from '@account/application/use-cases/create-account/create-account.use-case';
+import { CreateAccountRequestDto } from '@account/application/dtos/request/create-account-request.dto';
+
+import type { RequestUser } from '@core/strategies/jwt.strategy';
+
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('accounts')
 @ApiBearerAuth('access-token')

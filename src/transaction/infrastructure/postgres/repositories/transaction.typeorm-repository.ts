@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { Repository } from 'typeorm';
+
 import { Transaction } from '@transaction/domain/entities/transaction';
-import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
 import { TransactionMapper } from '@transaction/infrastructure/postgres/mappers/transaction.mapper';
+import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
 import { TransactionRecordTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction.typeorm-entity';
 
 @Injectable()

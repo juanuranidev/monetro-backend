@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { Repository } from 'typeorm';
+
 import { Account } from '@account/domain/entities/account';
-import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 import { AccountMapper } from '@account/infrastructure/postgres/mappers/account.mapper';
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
+import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 
 @Injectable()
 export class AccountTypeOrmRepository implements IAccountRepository {

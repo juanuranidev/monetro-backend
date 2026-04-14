@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID, MinLength } from 'class-validator';
+
+import { IsUUID, IsString, MinLength } from 'class-validator';
 
 export class CreateRuleRequestDto {
   @ApiProperty({ description: 'Pattern to match transaction descriptions' })

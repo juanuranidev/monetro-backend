@@ -1,13 +1,17 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
-import type { JwtPayload } from '@core/strategies/jwt.strategy';
-import { User } from '@user/domain/entities/user';
-import type { IUserRepository } from '@user/domain/ports/i-user-repository';
-import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+import { Inject, Injectable, ConflictException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
+import * as bcrypt from 'bcrypt';
+
 import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
 import type { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
+
+import type { JwtPayload } from '@core/strategies/jwt.strategy';
+
+import { User } from '@user/domain/entities/user';
+import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+import type { IUserRepository } from '@user/domain/ports/i-user-repository';
 
 const BCRYPT_SALT_ROUNDS = 12 as const;
 

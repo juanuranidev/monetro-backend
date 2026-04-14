@@ -1,18 +1,23 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  JoinColumn,
   RelationId,
+  CreateDateColumn,
   UpdateDateColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
+
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
+
 import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
-import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
+
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
+
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 @Entity({ name: 'transactions' })
 export class TransactionRecordTypeOrmEntity {

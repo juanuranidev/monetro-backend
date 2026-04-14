@@ -1,24 +1,27 @@
 import {
-  Body,
-  Controller,
   Get,
-  HttpCode,
-  HttpStatus,
+  Body,
   Post,
+  HttpCode,
+  Controller,
+  HttpStatus,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
-import type { RequestUser } from '@core/strategies/jwt.strategy';
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
-import { CreateCategoryRequestDto } from '@category/application/dtos/request/create-category-request.dto';
+
 import { CategoryEntityDto } from '@category/application/dtos/entity/category-entity.dto';
 import { CreateCategoryUseCase } from '@category/application/use-cases/create-category/create-category.use-case';
+import { CreateCategoryRequestDto } from '@category/application/dtos/request/create-category-request.dto';
+
+import type { RequestUser } from '@core/strategies/jwt.strategy';
+
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('categories')
 @ApiBearerAuth('access-token')

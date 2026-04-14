@@ -1,24 +1,26 @@
 import {
-  Body,
-  Controller,
   Get,
-  HttpCode,
-  HttpStatus,
+  Body,
   Post,
+  HttpCode,
+  Controller,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
-import { PublicRoute } from '@core/decorators/public-route.decorator';
+
 import { LoginRequestDto } from '@auth/application/dtos/request/login-request.dto';
-import { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
 import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
+import { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
 import { LoginUserUseCase } from '@auth/application/use-cases/login-user/login-user.use-case';
 import { RegisterUserUseCase } from '@auth/application/use-cases/register-user/register-user.use-case';
+
+import { PublicRoute } from '@core/decorators/public-route.decorator';
 
 @ApiTags('auth')
 @Controller('auth')

@@ -1,14 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import {
+  ApiTags,
+  ApiOperation,
   ApiBearerAuth,
   ApiOkResponse,
-  ApiOperation,
-  ApiTags,
 } from '@nestjs/swagger';
+
 import type { RequestUser } from '@core/strategies/jwt.strategy';
+
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 import { UserEntityDto } from '@user/application/dtos/entity/user-entity.dto';
 import { GetUserProfileUseCase } from '@user/application/use-cases/get-user-profile/get-user-profile.use-case';
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')

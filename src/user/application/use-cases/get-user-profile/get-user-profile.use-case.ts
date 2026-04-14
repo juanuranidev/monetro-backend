@@ -1,7 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { IUserRepository } from '@user/domain/ports/i-user-repository';
-import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+
 import { UserEntityDto } from '@user/application/dtos/entity/user-entity.dto';
+import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+import type { IUserRepository } from '@user/domain/ports/i-user-repository';
 
 @Injectable()
 export class GetUserProfileUseCase {

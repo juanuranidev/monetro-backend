@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { Repository } from 'typeorm';
+
 import { Rule } from '@rule/domain/entities/rule';
-import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 import { RuleMapper } from '@rule/infrastructure/postgres/mappers/rule.mapper';
 import { RuleTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule.typeorm-entity';
+import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 
 @Injectable()
 export class RuleTypeOrmRepository implements IRuleRepository {

@@ -1,24 +1,27 @@
 import {
-  Body,
-  Controller,
   Get,
-  HttpCode,
-  HttpStatus,
+  Body,
   Post,
+  HttpCode,
+  Controller,
+  HttpStatus,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
+
 import type { RequestUser } from '@core/strategies/jwt.strategy';
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
-import { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
+
 import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 import { CreateRuleUseCase } from '@rule/application/use-cases/create-rule/create-rule.use-case';
+import { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
+
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('rules')
 @ApiBearerAuth('access-token')

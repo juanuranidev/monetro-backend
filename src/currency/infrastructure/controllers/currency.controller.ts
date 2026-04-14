@@ -1,10 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import {
+  ApiTags,
+  ApiOperation,
   ApiBearerAuth,
   ApiOkResponse,
-  ApiOperation,
-  ApiTags,
 } from '@nestjs/swagger';
+
 import { CurrencyEntityDto } from '@currency/application/dtos/entity/currency-entity.dto';
 import { ListCurrenciesUseCase } from '@currency/application/use-cases/list-currencies/list-currencies.use-case';
 

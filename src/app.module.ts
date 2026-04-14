@@ -1,17 +1,26 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AccountModule } from '@account/account.module';
-// import { AccountMongoModule } from '@account/infrastructure/mongo/account-mongo.module';
+
 import { AuthModule } from '@auth/auth.module';
+
 import { CategoryModule } from '@category/category.module';
-import { CurrencyModule } from '@currency/currency.module';
+
 import { JwtAuthGuard } from '@core/guards/jwt-auth.guard';
+
+import { CurrencyModule } from '@currency/currency.module';
+
 import { DatabaseSeedService } from '@database/database-seed.service';
+
 import { HealthController } from '@health/health.controller';
+
 import { RuleModule } from '@rule/rule.module';
+
 import { TransactionModule } from '@transaction/transaction.module';
+
 import { UserModule } from '@user/user.module';
 
 @Module({
@@ -47,29 +56,12 @@ import { UserModule } from '@user/user.module';
         };
       },
     }),
-    /*
-     * MongoDB (Mongoose) — optional second connection. Uncomment when you add
-     * @nestjs/mongoose + mongoose and wire a real AccountMongoRepository using
-     * MongooseModule.forFeature([...]). The simulated AccountMongoModule works
-     * without this block (in-memory only).
-     *
-     * MongooseModule.forRootAsync({
-     *   imports: [ConfigModule],
-     *   inject: [ConfigService],
-     *   useFactory: (config: ConfigService) => ({
-     *     uri: config.getOrThrow<string>('MONGO_URI'),
-     *   }),
-     * }),
-     */
-    UserModule,
     AuthModule,
-    CurrencyModule,
-    AccountModule,
-    // AccountMongoModule — swap with AccountModule for Mongo simulation; then also
-    // switch AccountModule → AccountMongoModule in rule.module.ts and transaction.module.ts imports.
-    // AccountMongoModule,
-    CategoryModule,
     RuleModule,
+    UserModule,
+    AccountModule,
+    CategoryModule,
+    CurrencyModule,
     TransactionModule,
   ],
   controllers: [HealthController],

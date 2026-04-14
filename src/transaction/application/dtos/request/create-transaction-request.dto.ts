@@ -1,13 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
-  IsBoolean,
   IsIn,
-  IsOptional,
-  IsString,
   IsUUID,
   Length,
   Matches,
+  IsString,
+  IsBoolean,
   MinLength,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateTransactionRequestDto {

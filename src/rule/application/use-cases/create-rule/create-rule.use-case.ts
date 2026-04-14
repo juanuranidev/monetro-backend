@@ -1,14 +1,17 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+import { Inject, Injectable, BadRequestException } from '@nestjs/common';
+
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
-import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
+import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+
 import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
+import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
+
 import { Rule } from '@rule/domain/entities/rule';
+import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 import type { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
-import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 
 @Injectable()
 export class CreateRuleUseCase {
