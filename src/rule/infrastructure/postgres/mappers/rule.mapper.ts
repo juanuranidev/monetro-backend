@@ -1,5 +1,5 @@
-import { Rule } from '../../../domain/entities/rule';
-import { RuleTypeOrmEntity } from '../entities/rule.typeorm-entity';
+import { Rule } from '@rule/domain/entities/rule';
+import { RuleTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule.typeorm-entity';
 
 export class RuleMapper {
   /**

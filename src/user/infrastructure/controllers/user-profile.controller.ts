@@ -5,10 +5,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import type { RequestUser } from '../../../core/strategies/jwt.strategy';
-import { UserEntityDto } from '../../application/dtos/entity/user-entity.dto';
-import { GetUserProfileUseCase } from '../../application/use-cases/get-user-profile/get-user-profile.use-case';
-import { CurrentUser } from '../decorators/current-user.decorator';
+import type { RequestUser } from '@core/strategies/jwt.strategy';
+import { UserEntityDto } from '@user/application/dtos/entity/user-entity.dto';
+import { GetUserProfileUseCase } from '@user/application/use-cases/get-user-profile/get-user-profile.use-case';
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -30,9 +30,7 @@ export class UserProfileController {
   @Get('profile')
   @ApiOperation({ summary: 'Get authenticated user profile' })
   @ApiOkResponse({ type: UserEntityDto })
-  public getProfile(
-    @CurrentUser() user: RequestUser,
-  ): Promise<UserEntityDto> {
+  public getProfile(@CurrentUser() user: RequestUser): Promise<UserEntityDto> {
     return this.getUserProfileUseCase.execute(user.userId);
   }
 }

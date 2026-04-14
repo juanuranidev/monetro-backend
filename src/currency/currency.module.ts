@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ListCurrenciesUseCase } from './application/use-cases/list-currencies/list-currencies.use-case';
-import { CURRENCY_REPOSITORY } from './domain/currency-repository.token';
-import { CurrencyController } from './infrastructure/controllers/currency.controller';
-import { CurrencyTypeOrmEntity } from './infrastructure/postgres/entities/currency.typeorm-entity';
-import { CurrencyTypeOrmRepository } from './infrastructure/postgres/repositories/currency.typeorm-repository';
+import { ListCurrenciesUseCase } from '@currency/application/use-cases/list-currencies/list-currencies.use-case';
+import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
+import { CurrencyController } from '@currency/infrastructure/controllers/currency.controller';
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
+import { CurrencyTypeOrmRepository } from '@currency/infrastructure/postgres/repositories/currency.typeorm-repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([CurrencyTypeOrmEntity])],

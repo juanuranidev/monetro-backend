@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Currency } from '../../../domain/entities/currency';
-import type { ICurrencyRepository } from '../../../domain/ports/i-currency-repository';
-import { CurrencyMapper } from '../mappers/currency.mapper';
-import { CurrencyTypeOrmEntity } from '../entities/currency.typeorm-entity';
+import { Currency } from '@currency/domain/entities/currency';
+import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
+import { CurrencyMapper } from '@currency/infrastructure/postgres/mappers/currency.mapper';
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
 @Injectable()
 export class CurrencyTypeOrmRepository implements ICurrencyRepository {

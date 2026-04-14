@@ -1,4 +1,4 @@
-import type { MoneyAmount } from '../../../shared/domain/value-objects/money-amount';
+import type { MoneyAmount } from '@shared/domain/value-objects/money-amount';
 
 export class Transaction {
   public constructor(

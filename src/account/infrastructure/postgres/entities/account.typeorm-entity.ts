@@ -8,8 +8,8 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { CurrencyTypeOrmEntity } from '../../../../currency/infrastructure/postgres/entities/currency.typeorm-entity';
-import { UserTypeOrmEntity } from '../../../../user/infrastructure/postgres/entities/user.typeorm-entity';
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 @Entity({ name: 'accounts' })
 export class AccountTypeOrmEntity {

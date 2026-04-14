@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Category } from '../../../domain/entities/category';
-import { CATEGORY_REPOSITORY } from '../../../domain/category-repository.token';
-import type { ICategoryRepository } from '../../../domain/ports/i-category-repository';
-import { CategoryEntityDto } from '../../dtos/entity/category-entity.dto';
-import type { CreateCategoryRequestDto } from '../../dtos/request/create-category-request.dto';
+import { Category } from '@category/domain/entities/category';
+import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
+import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
+import { CategoryEntityDto } from '@category/application/dtos/entity/category-entity.dto';
+import type { CreateCategoryRequestDto } from '@category/application/dtos/request/create-category-request.dto';
 
 @Injectable()
 export class CreateCategoryUseCase {

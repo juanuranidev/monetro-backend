@@ -1,5 +1,5 @@
-import { Currency } from '../../../domain/entities/currency';
-import { CurrencyTypeOrmEntity } from '../entities/currency.typeorm-entity';
+import { Currency } from '@currency/domain/entities/currency';
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
 export class CurrencyMapper {
   /**

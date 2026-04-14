@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Account } from '../../../domain/entities/account';
-import type { IAccountRepository } from '../../../domain/ports/interface-account-repository';
-import { AccountMapper } from '../mappers/account.mapper';
-import { AccountTypeOrmEntity } from '../entities/account.typeorm-entity';
+import { Account } from '@account/domain/entities/account';
+import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+import { AccountMapper } from '@account/infrastructure/postgres/mappers/account.mapper';
+import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
 
 @Injectable()
 export class AccountTypeOrmRepository implements IAccountRepository {
   public constructor(
     @InjectRepository(AccountTypeOrmEntity)
     private readonly repository: Repository<AccountTypeOrmEntity>,
-  ) { }
+  ) {}
 
   public async create(domain: Account): Promise<Account> {
     const entity: AccountTypeOrmEntity = this.repository.create({

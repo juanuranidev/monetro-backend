@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { ICurrencyRepository } from '../../../../currency/domain/ports/i-currency-repository';
-import { CURRENCY_REPOSITORY } from '../../../../currency/domain/currency-repository.token';
-import { Account } from '../../../domain/entities/account';
-import { ACCOUNT_REPOSITORY } from '../../../domain/account-repository.token';
-import type { IAccountRepository } from '../../../domain/ports/interface-account-repository';
-import { AccountEntityDto } from '../../dtos/entity/account-entity.dto';
-import type { CreateAccountRequestDto } from '../../dtos/request/create-account-request.dto';
+import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
+import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
+import { Account } from '@account/domain/entities/account';
+import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
+import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+import { AccountEntityDto } from '@account/application/dtos/entity/account-entity.dto';
+import type { CreateAccountRequestDto } from '@account/application/dtos/request/create-account-request.dto';
 
 @Injectable()
 export class CreateAccountUseCase {
@@ -15,7 +15,7 @@ export class CreateAccountUseCase {
     private readonly accountRepository: IAccountRepository,
     @Inject(CURRENCY_REPOSITORY)
     private readonly currencyRepository: ICurrencyRepository,
-  ) { }
+  ) {}
 
   public async execute(
     userId: string,

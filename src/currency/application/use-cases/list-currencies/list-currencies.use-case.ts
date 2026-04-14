@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ICurrencyRepository } from '../../../domain/ports/i-currency-repository';
-import { CURRENCY_REPOSITORY } from '../../../domain/currency-repository.token';
-import { CurrencyEntityDto } from '../../dtos/entity/currency-entity.dto';
+import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
+import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
+import { CurrencyEntityDto } from '@currency/application/dtos/entity/currency-entity.dto';
 
 @Injectable()
 export class ListCurrenciesUseCase {

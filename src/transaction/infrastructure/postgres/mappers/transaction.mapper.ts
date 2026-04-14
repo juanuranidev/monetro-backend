@@ -1,6 +1,6 @@
-import { MoneyAmount } from '../../../../shared/domain/value-objects/money-amount';
-import { Transaction } from '../../../domain/entities/transaction';
-import { TransactionRecordTypeOrmEntity } from '../entities/transaction.typeorm-entity';
+import { MoneyAmount } from '@shared/domain/value-objects/money-amount';
+import { Transaction } from '@transaction/domain/entities/transaction';
+import { TransactionRecordTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction.typeorm-entity';
 
 export class TransactionMapper {
   /**

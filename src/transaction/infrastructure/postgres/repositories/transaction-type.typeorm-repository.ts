@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TransactionType } from '../../../domain/entities/transaction-type';
-import type { ITransactionTypeRepository } from '../../../domain/ports/i-transaction-type-repository';
-import { TransactionTypeMapper } from '../mappers/transaction-type.mapper';
-import { TransactionTypeTypeOrmEntity } from '../entities/transaction-type.typeorm-entity';
+import { TransactionType } from '@transaction/domain/entities/transaction-type';
+import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
+import { TransactionTypeMapper } from '@transaction/infrastructure/postgres/mappers/transaction-type.mapper';
+import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
 @Injectable()
 export class TransactionTypeTypeOrmRepository implements ITransactionTypeRepository {
@@ -18,6 +18,8 @@ export class TransactionTypeTypeOrmRepository implements ITransactionTypeReposit
       await this.repository.findOne({
         where: { code: code.toUpperCase() },
       });
-    return row === null ? undefined : TransactionTypeMapper.fromPostgresToDomain(row);
+    return row === null
+      ? undefined
+      : TransactionTypeMapper.fromPostgresToDomain(row);
   }
 }

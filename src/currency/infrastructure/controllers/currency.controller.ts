@@ -5,8 +5,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrencyEntityDto } from '../../application/dtos/entity/currency-entity.dto';
-import { ListCurrenciesUseCase } from '../../application/use-cases/list-currencies/list-currencies.use-case';
+import { CurrencyEntityDto } from '@currency/application/dtos/entity/currency-entity.dto';
+import { ListCurrenciesUseCase } from '@currency/application/use-cases/list-currencies/list-currencies.use-case';
 
 @ApiTags('currencies')
 @ApiBearerAuth('access-token')

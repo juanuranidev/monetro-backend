@@ -1,14 +1,14 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { IAccountRepository } from '../../../../account/domain/ports/interface-account-repository';
-import { ACCOUNT_REPOSITORY } from '../../../../account/domain/account-repository.token';
-import type { ICategoryRepository } from '../../../../category/domain/ports/i-category-repository';
-import { CATEGORY_REPOSITORY } from '../../../../category/domain/category-repository.token';
-import { Rule } from '../../../domain/entities/rule';
-import { RULE_REPOSITORY } from '../../../domain/rule-repository.token';
-import type { IRuleRepository } from '../../../domain/ports/i-rule-repository';
-import type { CreateRuleRequestDto } from '../../dtos/request/create-rule-request.dto';
-import { RuleEntityDto } from '../../dtos/entity/rule-entity.dto';
+import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
+import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
+import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
+import { Rule } from '@rule/domain/entities/rule';
+import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
+import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
+import type { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
+import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 
 @Injectable()
 export class CreateRuleUseCase {
@@ -19,7 +19,7 @@ export class CreateRuleUseCase {
     private readonly categoryRepository: ICategoryRepository,
     @Inject(ACCOUNT_REPOSITORY)
     private readonly accountRepository: IAccountRepository,
-  ) { }
+  ) {}
 
   public async execute(
     userId: string,

@@ -1,4 +1,4 @@
-import type { Account } from '../entities/account';
+import type { Account } from '@account/domain/entities/account';
 
 export interface IAccountRepository {
   create(account: Account): Promise<Account>;

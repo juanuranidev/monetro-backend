@@ -1,5 +1,5 @@
-import { User } from '../../../domain/entities/user';
-import { UserTypeOrmEntity } from '../entities/user.typeorm-entity';
+import { User } from '@user/domain/entities/user';
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 /**
  * Maps between domain User and Postgres-backed persistence (TypeORM).
@@ -22,7 +22,9 @@ export class UserMapper {
   /**
    * Maps a domain user to fields for a Postgres row (TypeORM insert/update).
    */
-  public static fromDomainToPostgresRow(domain: User): Partial<UserTypeOrmEntity> {
+  public static fromDomainToPostgresRow(
+    domain: User,
+  ): Partial<UserTypeOrmEntity> {
     return {
       id: domain.id,
       name: domain.name,

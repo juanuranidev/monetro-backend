@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GetUserProfileUseCase } from './application/use-cases/get-user-profile/get-user-profile.use-case';
-import { USER_REPOSITORY } from './domain/user-repository.token';
-import { UserProfileController } from './infrastructure/controllers/user-profile.controller';
-import { UserTypeOrmEntity } from './infrastructure/postgres/entities/user.typeorm-entity';
-import { UserTypeOrmRepository } from './infrastructure/postgres/repositories/user.typeorm-repository';
+import { GetUserProfileUseCase } from '@user/application/use-cases/get-user-profile/get-user-profile.use-case';
+import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+import { UserProfileController } from '@user/infrastructure/controllers/user-profile.controller';
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
+import { UserTypeOrmRepository } from '@user/infrastructure/postgres/repositories/user.typeorm-repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserTypeOrmEntity])],

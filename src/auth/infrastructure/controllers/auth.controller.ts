@@ -13,12 +13,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PublicRoute } from '../../../core/decorators/public-route.decorator';
-import { LoginRequestDto } from '../../application/dtos/request/login-request.dto';
-import { SignupRequestDto } from '../../application/dtos/request/signup-request.dto';
-import { AuthResponseDto } from '../../application/dtos/response/auth-response.dto';
-import { LoginUserUseCase } from '../../application/use-cases/login-user/login-user.use-case';
-import { RegisterUserUseCase } from '../../application/use-cases/register-user/register-user.use-case';
+import { PublicRoute } from '@core/decorators/public-route.decorator';
+import { LoginRequestDto } from '@auth/application/dtos/request/login-request.dto';
+import { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
+import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
+import { LoginUserUseCase } from '@auth/application/use-cases/login-user/login-user.use-case';
+import { RegisterUserUseCase } from '@auth/application/use-cases/register-user/register-user.use-case';
 
 @ApiTags('auth')
 @Controller('auth')

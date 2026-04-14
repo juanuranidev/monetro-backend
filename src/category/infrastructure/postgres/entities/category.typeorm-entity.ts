@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserTypeOrmEntity } from '../../../../user/infrastructure/postgres/entities/user.typeorm-entity';
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 @Entity({ name: 'categories' })
 export class CategoryTypeOrmEntity {

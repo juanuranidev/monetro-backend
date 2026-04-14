@@ -1,4 +1,4 @@
-import type { Rule } from '../entities/rule';
+import type { Rule } from '@rule/domain/entities/rule';
 
 export interface IRuleRepository {
   create(rule: Rule): Promise<Rule>;

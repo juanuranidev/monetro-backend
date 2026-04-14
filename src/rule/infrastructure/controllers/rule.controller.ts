@@ -14,11 +14,11 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import type { RequestUser } from '../../../core/strategies/jwt.strategy';
-import { CurrentUser } from '../../../user/infrastructure/decorators/current-user.decorator';
-import { CreateRuleRequestDto } from '../../application/dtos/request/create-rule-request.dto';
-import { RuleEntityDto } from '../../application/dtos/entity/rule-entity.dto';
-import { CreateRuleUseCase } from '../../application/use-cases/create-rule/create-rule.use-case';
+import type { RequestUser } from '@core/strategies/jwt.strategy';
+import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
+import { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
+import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
+import { CreateRuleUseCase } from '@rule/application/use-cases/create-rule/create-rule.use-case';
 
 @ApiTags('rules')
 @ApiBearerAuth('access-token')

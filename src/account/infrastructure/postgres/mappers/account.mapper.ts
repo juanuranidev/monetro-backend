@@ -1,5 +1,5 @@
-import { Account } from '../../../domain/entities/account';
-import { AccountTypeOrmEntity } from '../entities/account.typeorm-entity';
+import { Account } from '@account/domain/entities/account';
+import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
 
 export class AccountMapper {
   /**

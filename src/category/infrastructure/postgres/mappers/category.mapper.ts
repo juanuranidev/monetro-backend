@@ -1,5 +1,5 @@
-import { Category } from '../../../domain/entities/category';
-import { CategoryTypeOrmEntity } from '../entities/category.typeorm-entity';
+import { Category } from '@category/domain/entities/category';
+import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 
 export class CategoryMapper {
   /**

@@ -2,17 +2,17 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccountModule } from './account/account.module';
-// import { AccountMongoModule } from './account/infrastructure/mongo/account-mongo.module';
-import { AuthModule } from './auth/auth.module';
-import { CategoryModule } from './category/category.module';
-import { CurrencyModule } from './currency/currency.module';
-import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
-import { DatabaseSeedService } from './database/database-seed.service';
-import { HealthController } from './health/health.controller';
-import { RuleModule } from './rule/rule.module';
-import { TransactionModule } from './transaction/transaction.module';
-import { UserModule } from './user/user.module';
+import { AccountModule } from '@account/account.module';
+// import { AccountMongoModule } from '@account/infrastructure/mongo/account-mongo.module';
+import { AuthModule } from '@auth/auth.module';
+import { CategoryModule } from '@category/category.module';
+import { CurrencyModule } from '@currency/currency.module';
+import { JwtAuthGuard } from '@core/guards/jwt-auth.guard';
+import { DatabaseSeedService } from '@database/database-seed.service';
+import { HealthController } from '@health/health.controller';
+import { RuleModule } from '@rule/rule.module';
+import { TransactionModule } from '@transaction/transaction.module';
+import { UserModule } from '@user/user.module';
 
 @Module({
   imports: [

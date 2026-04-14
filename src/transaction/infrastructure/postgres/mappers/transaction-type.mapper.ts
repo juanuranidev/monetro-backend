@@ -1,5 +1,5 @@
-import { TransactionType } from '../../../domain/entities/transaction-type';
-import { TransactionTypeTypeOrmEntity } from '../entities/transaction-type.typeorm-entity';
+import { TransactionType } from '@transaction/domain/entities/transaction-type';
+import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
 export class TransactionTypeMapper {
   /**
