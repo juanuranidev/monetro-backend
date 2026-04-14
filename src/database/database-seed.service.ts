@@ -1,5 +1,5 @@
-import { Logger, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { Logger, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { IsNull, DataSource } from 'typeorm';
 

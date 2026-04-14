@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
-import { Inject, Injectable, ConflictException } from '@nestjs/common';
+
 import { JwtService } from '@nestjs/jwt';
+import { Inject, Injectable, ConflictException } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 

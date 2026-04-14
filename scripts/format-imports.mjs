@@ -71,6 +71,14 @@ function parseImportNode(snippet) {
 }
 
 /**
+ * @param {string} specifier
+ * @returns {boolean}
+ */
+function isNestJsScopedPackage(specifier) {
+  return specifier.startsWith('@nestjs/');
+}
+
+/**
  * Splits the inside of `{ ... }` in a named import (comma-separated, trim only).
  * @param {string} inner
  * @returns {string[]}
@@ -148,6 +156,18 @@ function compareDeclarations(aDecl, bDecl, sourceFile) {
     }
     return aParsed.binding.length - bParsed.binding.length;
   }
+  if (aClass.order === 2 && bClass.order === 2) {
+    const aNest = isNestJsScopedPackage(aParsed.specifier);
+    const bNest = isNestJsScopedPackage(bParsed.specifier);
+    if (aNest !== bNest) {
+      return aNest ? -1 : 1;
+    }
+    const lenDiff = aParsed.binding.length - bParsed.binding.length;
+    if (lenDiff !== 0) {
+      return lenDiff;
+    }
+    return aParsed.specifier.localeCompare(bParsed.specifier);
+  }
   if (aClass.groupKey !== bClass.groupKey) {
     return aClass.groupKey.localeCompare(bClass.groupKey);
   }
@@ -160,14 +180,6 @@ function compareDeclarations(aDecl, bDecl, sourceFile) {
  */
 function sliceImport(sourceFile, node) {
   return sourceFile.text.substring(node.getStart(sourceFile, false), node.end);
-}
-
-/**
- * @param {string} specifier
- * @returns {boolean}
- */
-function isNestJsScopedPackage(specifier) {
-  return specifier.startsWith('@nestjs/');
 }
 
 /**
@@ -208,7 +220,6 @@ function formatImportBlock(imports, sourceFile) {
       isExternalDependencyOrder(prevClass.order) &&
       isExternalDependencyOrder(cls.order) &&
       prevSpecifier !== parsed.specifier &&
-      !(prevSpecifier === 'crypto' && isNestJsScopedPackage(parsed.specifier)) &&
       !nestJsGroupNoBreak;
     const isNewParagraph =
       prevClass !== null &&

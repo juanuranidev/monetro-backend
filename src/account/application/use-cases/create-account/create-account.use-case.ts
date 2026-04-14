@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
 import { Account } from '@account/domain/entities/account';

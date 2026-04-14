@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Category } from '@category/domain/entities/category';
