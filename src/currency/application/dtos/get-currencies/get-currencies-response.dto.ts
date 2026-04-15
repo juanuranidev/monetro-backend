@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-/** One row in {@link ListCurrenciesUseCase} result. */
-export class ListCurrenciesResultDto {
+/** One row in {@link GetCurrenciesUseCase} result. */
+export class GetCurrenciesResponseDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 

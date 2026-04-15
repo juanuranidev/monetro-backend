@@ -6,16 +6,16 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 
-import { ListCurrenciesUseCase } from '@currency/application/use-cases/list-currencies/list-currencies.use-case';
-import { ListCurrenciesResultDto } from '@currency/application/dtos/list-currencies/list-currencies-response.dto';
-import { ListCurrenciesRequestDto } from '@currency/application/dtos/list-currencies/list-currencies-request.dto';
+import { GetCurrenciesUseCase } from '@currency/application/use-cases/get-currencies/get-currencies.use-case';
+import { GetCurrenciesRequestDto } from '@currency/application/dtos/get-currencies/get-currencies-request.dto';
+import { GetCurrenciesResponseDto } from '@currency/application/dtos/get-currencies/get-currencies-response.dto';
 
 @ApiTags('currencies')
 @ApiBearerAuth('access-token')
 @Controller('currencies')
 export class CurrencyController {
   public constructor(
-    private readonly listCurrenciesUseCase: ListCurrenciesUseCase,
+    private readonly getCurrenciesUseCase: GetCurrenciesUseCase,
   ) {}
 
   @Get('admin/test')
@@ -28,10 +28,10 @@ export class CurrencyController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all currencies' })
-  @ApiOkResponse({ type: ListCurrenciesResultDto, isArray: true })
-  public list(): Promise<ListCurrenciesResultDto[]> {
-    const input: ListCurrenciesRequestDto = new ListCurrenciesRequestDto();
-    return this.listCurrenciesUseCase.execute(input);
+  @ApiOperation({ summary: 'Get all currencies' })
+  @ApiOkResponse({ type: GetCurrenciesResponseDto, isArray: true })
+  public getCurrencies(): Promise<GetCurrenciesResponseDto[]> {
+    const input: GetCurrenciesRequestDto = new GetCurrenciesRequestDto();
+    return this.getCurrenciesUseCase.execute(input);
   }
 }

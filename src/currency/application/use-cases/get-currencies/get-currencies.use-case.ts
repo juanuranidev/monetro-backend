@@ -1,24 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
-import { ListCurrenciesResultDto } from '@currency/application/dtos/list-currencies/list-currencies-response.dto';
+import { GetCurrenciesResponseDto } from '@currency/application/dtos/get-currencies/get-currencies-response.dto';
 import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
-import type { ListCurrenciesRequestDto } from '@currency/application/dtos/list-currencies/list-currencies-request.dto';
+import type { GetCurrenciesRequestDto } from '@currency/application/dtos/get-currencies/get-currencies-request.dto';
 
 @Injectable()
-export class ListCurrenciesUseCase {
+export class GetCurrenciesUseCase {
   public constructor(
     @Inject(CURRENCY_REPOSITORY)
     private readonly currencyRepository: ICurrencyRepository,
   ) {}
 
   public async execute(
-    input: ListCurrenciesRequestDto,
-  ): Promise<ListCurrenciesResultDto[]> {
+    input: GetCurrenciesRequestDto,
+  ): Promise<GetCurrenciesResponseDto[]> {
     void input;
     const currencies = await this.currencyRepository.findAll();
     return currencies.map((c) => {
-      const row: ListCurrenciesResultDto = new ListCurrenciesResultDto();
+      const row: GetCurrenciesResponseDto = new GetCurrenciesResponseDto();
       row.id = c.id;
       row.code = c.code;
       row.symbol = c.symbol;

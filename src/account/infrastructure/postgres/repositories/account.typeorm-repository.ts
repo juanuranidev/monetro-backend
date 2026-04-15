@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
 
@@ -27,6 +27,32 @@ export class AccountTypeOrmRepository implements IAccountRepository {
     });
     const saved: AccountTypeOrmEntity = await this.repository.save(entity);
     return AccountMapper.fromPostgresToDomain(saved);
+  }
+
+  public async update(domain: Account): Promise<Account> {
+    const entity: AccountTypeOrmEntity | null = await this.repository.findOne({
+      where: { id: domain.id, userId: domain.userId },
+    });
+    if (entity === null) {
+      throw new NotFoundException('Account not found');
+    }
+    entity.name = domain.name;
+    entity.identifier = domain.identifier;
+    entity.icon = domain.icon ?? null;
+    entity.excludeFromStats = domain.excludeFromStats;
+    entity.currencyId = domain.currencyId;
+    const saved: AccountTypeOrmEntity = await this.repository.save(entity);
+    return AccountMapper.fromPostgresToDomain(saved);
+  }
+
+  public async findAllByUserId(userId: string): Promise<Account[]> {
+    const rows: AccountTypeOrmEntity[] = await this.repository.find({
+      where: { userId },
+      order: { name: 'ASC' },
+    });
+    return rows.map((row: AccountTypeOrmEntity) =>
+      AccountMapper.fromPostgresToDomain(row),
+    );
   }
 
   public async findOwnedByUser(
