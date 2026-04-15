@@ -1,6 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiHideProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 import {
+  IsUUID,
   Length,
   IsString,
   IsBoolean,
@@ -9,6 +14,10 @@ import {
 } from 'class-validator';
 
 export class CreateAccountRequestDto {
+  @ApiHideProperty()
+  @IsUUID()
+  public userId!: string;
+
   @ApiProperty()
   @IsString()
   @MinLength(1)

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TransactionEntityDto {
+export class CreateTransactionResponseDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
@@ -27,26 +27,4 @@ export class TransactionEntityDto {
 
   @ApiProperty({ format: 'uuid' })
   public accountId!: string;
-
-  public constructor(
-    id: string,
-    amount: string,
-    description: string,
-    recordDate: string,
-    excludeFromStats: boolean,
-    categoryId: string,
-    transactionTypeId: string,
-    currencyId: string,
-    accountId: string,
-  ) {
-    this.id = id;
-    this.amount = amount;
-    this.description = description;
-    this.recordDate = recordDate;
-    this.excludeFromStats = excludeFromStats;
-    this.categoryId = categoryId;
-    this.transactionTypeId = transactionTypeId;
-    this.currencyId = currencyId;
-    this.accountId = accountId;
-  }
 }

@@ -5,6 +5,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -15,15 +16,14 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-import type { RequestUser } from '@core/strategies/jwt.strategy';
+import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
-import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 import { CreateRuleUseCase } from '@rule/application/use-cases/create-rule/create-rule.use-case';
-import { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
-
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
+import { CreateRuleRequestDto } from '@rule/application/dtos/create-rule/create-rule-request.dto';
+import { CreateRuleResponseDto } from '@rule/application/dtos/create-rule/create-rule-response.dto';
 
 @ApiTags('rules')
+@UseInterceptors(MergeAuthenticatedUserIdInterceptor)
 @ApiBearerAuth('access-token')
 @Controller('rules')
 export class RuleController {
@@ -42,11 +42,10 @@ export class RuleController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a categorization rule' })
   @ApiBody({ type: CreateRuleRequestDto })
-  @ApiCreatedResponse({ type: RuleEntityDto })
+  @ApiCreatedResponse({ type: CreateRuleResponseDto })
   public create(
-    @CurrentUser() user: RequestUser,
     @Body() body: CreateRuleRequestDto,
-  ): Promise<RuleEntityDto> {
-    return this.createRuleUseCase.execute(user.userId, body);
+  ): Promise<CreateRuleResponseDto> {
+    return this.createRuleUseCase.execute(body);
   }
 }

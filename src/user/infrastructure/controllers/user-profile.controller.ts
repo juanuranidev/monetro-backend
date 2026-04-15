@@ -9,8 +9,9 @@ import {
 import type { RequestUser } from '@core/strategies/jwt.strategy';
 
 import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
-import { UserEntityDto } from '@user/application/dtos/entity/user-entity.dto';
 import { GetUserProfileUseCase } from '@user/application/use-cases/get-user-profile/get-user-profile.use-case';
+import { GetUserProfileRequestDto } from '@user/application/dtos/get-user-profile/get-user-profile-request.dto';
+import { GetUserProfileResponseDto } from '@user/application/dtos/get-user-profile/get-user-profile-response.dto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -31,8 +32,12 @@ export class UserProfileController {
 
   @Get('profile')
   @ApiOperation({ summary: 'Get authenticated user profile' })
-  @ApiOkResponse({ type: UserEntityDto })
-  public getProfile(@CurrentUser() user: RequestUser): Promise<UserEntityDto> {
-    return this.getUserProfileUseCase.execute(user.userId);
+  @ApiOkResponse({ type: GetUserProfileResponseDto })
+  public getProfile(
+    @CurrentUser() user: RequestUser,
+  ): Promise<GetUserProfileResponseDto> {
+    const input: GetUserProfileRequestDto = new GetUserProfileRequestDto();
+    input.userId = user.userId;
+    return this.getUserProfileUseCase.execute(input);
   }
 }

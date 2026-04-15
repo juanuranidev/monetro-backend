@@ -14,12 +14,12 @@ import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repo
 import { MoneyAmount } from '@shared/domain/value-objects/money-amount';
 
 import { Transaction } from '@transaction/domain/entities/transaction';
-import { TransactionEntityDto } from '@transaction/application/dtos/entity/transaction-entity.dto';
 import { TRANSACTION_REPOSITORY } from '@transaction/domain/transaction-repository.token';
 import { TRANSACTION_TYPE_REPOSITORY } from '@transaction/domain/transaction-type-repository.token';
 import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
+import { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
 import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
-import type { CreateTransactionRequestDto } from '@transaction/application/dtos/request/create-transaction-request.dto';
+import type { CreateTransactionRequestDto } from '@transaction/application/dtos/create-transaction/create-transaction-request.dto';
 
 @Injectable()
 export class CreateTransactionUseCase {
@@ -37,9 +37,9 @@ export class CreateTransactionUseCase {
   ) {}
 
   public async execute(
-    userId: string,
     input: CreateTransactionRequestDto,
-  ): Promise<TransactionEntityDto> {
+  ): Promise<CreateTransactionResponseDto> {
+    const userId: string = input.userId;
     const category = await this.categoryRepository.findAccessibleByUser(
       input.categoryId,
       userId,
@@ -96,16 +96,17 @@ export class CreateTransactionUseCase {
     );
     const saved: Transaction =
       await this.transactionRepository.create(transaction);
-    return new TransactionEntityDto(
-      saved.id,
-      saved.amount.toPersistenceString(),
-      saved.description,
-      saved.recordDate.toISOString().slice(0, 10),
-      saved.excludeFromStats,
-      saved.categoryId,
-      saved.transactionTypeId,
-      saved.currencyId,
-      saved.accountId,
-    );
+    const response: CreateTransactionResponseDto =
+      new CreateTransactionResponseDto();
+    response.id = saved.id;
+    response.amount = saved.amount.toPersistenceString();
+    response.description = saved.description;
+    response.recordDate = saved.recordDate.toISOString().slice(0, 10);
+    response.excludeFromStats = saved.excludeFromStats;
+    response.categoryId = saved.categoryId;
+    response.transactionTypeId = saved.transactionTypeId;
+    response.currencyId = saved.currencyId;
+    response.accountId = saved.accountId;
+    return response;
   }
 }

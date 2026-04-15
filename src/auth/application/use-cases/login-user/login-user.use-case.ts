@@ -3,8 +3,11 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 
-import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
-import type { LoginRequestDto } from '@auth/application/dtos/request/login-request.dto';
+import type { LoginUserRequestDto } from '@auth/application/dtos/login-user/login-user-request.dto';
+import {
+  LoginUserResponseDto,
+  LoginUserResponseUserDto,
+} from '@auth/application/dtos/login-user/login-user-response.dto';
 
 import type { JwtPayload } from '@core/strategies/jwt.strategy';
 
@@ -19,7 +22,9 @@ export class LoginUserUseCase {
     private readonly jwtService: JwtService,
   ) {}
 
-  public async execute(input: LoginRequestDto): Promise<AuthResponseDto> {
+  public async execute(
+    input: LoginUserRequestDto,
+  ): Promise<LoginUserResponseDto> {
     const emailNormalized: string = input.email.toLowerCase();
     const user = await this.userRepository.findByEmail(emailNormalized);
     if (user === undefined || user.passwordHash === undefined) {
@@ -37,14 +42,14 @@ export class LoginUserUseCase {
       email: user.email,
     };
     const accessToken: string = await this.jwtService.signAsync(payload);
-    const response: AuthResponseDto = new AuthResponseDto();
+    const response: LoginUserResponseDto = new LoginUserResponseDto();
     response.accessToken = accessToken;
-    response.user = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      image: user.image,
-    };
+    const userDto: LoginUserResponseUserDto = new LoginUserResponseUserDto();
+    userDto.id = user.id;
+    userDto.name = user.name;
+    userDto.email = user.email;
+    userDto.image = user.image;
+    response.user = userDto;
     return response;
   }
 }

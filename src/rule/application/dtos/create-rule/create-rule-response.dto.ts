@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RuleEntityDto {
+export class CreateRuleResponseDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
@@ -12,16 +12,4 @@ export class RuleEntityDto {
 
   @ApiProperty({ format: 'uuid' })
   public targetAccountId!: string;
-
-  public constructor(
-    id: string,
-    pattern: string,
-    targetCategoryId: string,
-    targetAccountId: string,
-  ) {
-    this.id = id;
-    this.pattern = pattern;
-    this.targetCategoryId = targetCategoryId;
-    this.targetAccountId = targetAccountId;
-  }
 }

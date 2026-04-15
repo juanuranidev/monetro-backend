@@ -5,6 +5,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -15,15 +16,14 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-import { CategoryEntityDto } from '@category/application/dtos/entity/category-entity.dto';
 import { CreateCategoryUseCase } from '@category/application/use-cases/create-category/create-category.use-case';
-import { CreateCategoryRequestDto } from '@category/application/dtos/request/create-category-request.dto';
+import { CreateCategoryRequestDto } from '@category/application/dtos/create-category/create-category-request.dto';
+import { CreateCategoryResponseDto } from '@category/application/dtos/create-category/create-category-response.dto';
 
-import type { RequestUser } from '@core/strategies/jwt.strategy';
-
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
+import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
 @ApiTags('categories')
+@UseInterceptors(MergeAuthenticatedUserIdInterceptor)
 @ApiBearerAuth('access-token')
 @Controller('categories')
 export class CategoryController {
@@ -44,11 +44,10 @@ export class CategoryController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a category for the current user' })
   @ApiBody({ type: CreateCategoryRequestDto })
-  @ApiCreatedResponse({ type: CategoryEntityDto })
+  @ApiCreatedResponse({ type: CreateCategoryResponseDto })
   public create(
-    @CurrentUser() user: RequestUser,
     @Body() body: CreateCategoryRequestDto,
-  ): Promise<CategoryEntityDto> {
-    return this.createCategoryUseCase.execute(user.userId, body);
+  ): Promise<CreateCategoryResponseDto> {
+    return this.createCategoryUseCase.execute(body);
   }
 }

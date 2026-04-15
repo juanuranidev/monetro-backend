@@ -1,8 +1,22 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiHideProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 
-import { IsString, IsBoolean, MinLength, IsOptional } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsBoolean,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateCategoryRequestDto {
+  @ApiHideProperty()
+  @IsUUID()
+  public userId!: string;
+
   @ApiProperty()
   @IsString()
   @MinLength(1)

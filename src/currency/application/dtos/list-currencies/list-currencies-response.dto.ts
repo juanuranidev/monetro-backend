@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CurrencyEntityDto {
+/** One row in {@link ListCurrenciesUseCase} result. */
+export class ListCurrenciesResultDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
@@ -12,11 +13,4 @@ export class CurrencyEntityDto {
 
   @ApiProperty()
   public name!: string;
-
-  public constructor(id: string, code: string, symbol: string, name: string) {
-    this.id = id;
-    this.code = code;
-    this.symbol = symbol;
-    this.name = name;
-  }
 }

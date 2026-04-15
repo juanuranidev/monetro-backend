@@ -1,4 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiHideProperty,
+  ApiPropertyOptional,
+} from '@nestjs/swagger';
 
 import {
   IsIn,
@@ -12,6 +16,10 @@ import {
 } from 'class-validator';
 
 export class CreateTransactionRequestDto {
+  @ApiHideProperty()
+  @IsUUID()
+  public userId!: string;
+
   @ApiProperty({
     description:
       'Amount as a decimal string (max 8 integer digits, 2 fractional). Parsed with exact decimal arithmetic.',

@@ -5,6 +5,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -15,15 +16,14 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-import type { RequestUser } from '@core/strategies/jwt.strategy';
+import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
-import { TransactionEntityDto } from '@transaction/application/dtos/entity/transaction-entity.dto';
 import { CreateTransactionUseCase } from '@transaction/application/use-cases/create-transaction/create-transaction.use-case';
-import { CreateTransactionRequestDto } from '@transaction/application/dtos/request/create-transaction-request.dto';
-
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
+import { CreateTransactionRequestDto } from '@transaction/application/dtos/create-transaction/create-transaction-request.dto';
+import { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
 
 @ApiTags('transactions')
+@UseInterceptors(MergeAuthenticatedUserIdInterceptor)
 @ApiBearerAuth('access-token')
 @Controller('transactions')
 export class TransactionController {
@@ -44,11 +44,10 @@ export class TransactionController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a financial transaction' })
   @ApiBody({ type: CreateTransactionRequestDto })
-  @ApiCreatedResponse({ type: TransactionEntityDto })
+  @ApiCreatedResponse({ type: CreateTransactionResponseDto })
   public create(
-    @CurrentUser() user: RequestUser,
     @Body() body: CreateTransactionRequestDto,
-  ): Promise<TransactionEntityDto> {
-    return this.createTransactionUseCase.execute(user.userId, body);
+  ): Promise<CreateTransactionResponseDto> {
+    return this.createTransactionUseCase.execute(body);
   }
 }

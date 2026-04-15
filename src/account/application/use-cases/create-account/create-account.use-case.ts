@@ -3,10 +3,10 @@ import { randomUUID } from 'crypto';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
 import { Account } from '@account/domain/entities/account';
-import { AccountEntityDto } from '@account/application/dtos/entity/account-entity.dto';
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
-import type { CreateAccountRequestDto } from '@account/application/dtos/request/create-account-request.dto';
+import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
+import type { CreateAccountRequestDto } from '@account/application/dtos/create-account/create-account-request.dto';
 
 import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
 import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
@@ -21,9 +21,8 @@ export class CreateAccountUseCase {
   ) {}
 
   public async execute(
-    userId: string,
     input: CreateAccountRequestDto,
-  ): Promise<AccountEntityDto> {
+  ): Promise<CreateAccountResponseDto> {
     const currency = await this.currencyRepository.findByCode(
       input.currencyCode.toUpperCase(),
     );
@@ -38,16 +37,18 @@ export class CreateAccountUseCase {
       input.icon?.trim(),
       excludeFromStats,
       currency.id,
-      userId,
+      input.userId,
     );
     const saved: Account = await this.accountRepository.create(account);
-    return new AccountEntityDto(
-      saved.id,
-      saved.name,
-      saved.identifier,
-      saved.icon,
-      saved.excludeFromStats,
-      saved.currencyId,
-    );
+    const response: CreateAccountResponseDto = new CreateAccountResponseDto();
+    response.id = saved.id;
+    response.name = saved.name;
+    response.identifier = saved.identifier;
+    response.excludeFromStats = saved.excludeFromStats;
+    response.currencyId = saved.currencyId;
+    if (saved.icon !== undefined) {
+      response.icon = saved.icon;
+    }
+    return response;
   }
 }

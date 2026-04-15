@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-export class SignupRequestDto {
+export class RegisterUserRequestDto {
   @ApiProperty({ example: 'Jane Doe' })
   @IsString()
   @MinLength(1)

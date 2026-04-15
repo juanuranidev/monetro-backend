@@ -5,8 +5,11 @@ import { Inject, Injectable, ConflictException } from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 
-import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
-import type { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
+import type { RegisterUserRequestDto } from '@auth/application/dtos/register-user/register-user-request.dto';
+import {
+  RegisterUserResponseDto,
+  RegisterUserResponseUserDto,
+} from '@auth/application/dtos/register-user/register-user-response.dto';
 
 import type { JwtPayload } from '@core/strategies/jwt.strategy';
 
@@ -24,7 +27,9 @@ export class RegisterUserUseCase {
     private readonly jwtService: JwtService,
   ) {}
 
-  public async execute(input: SignupRequestDto): Promise<AuthResponseDto> {
+  public async execute(
+    input: RegisterUserRequestDto,
+  ): Promise<RegisterUserResponseDto> {
     const emailNormalized: string = input.email.toLowerCase();
     const exists: boolean =
       await this.userRepository.existsByEmail(emailNormalized);
@@ -57,14 +62,15 @@ export class RegisterUserUseCase {
       email: saved.email,
     };
     const accessToken: string = await this.jwtService.signAsync(payload);
-    const response: AuthResponseDto = new AuthResponseDto();
+    const response: RegisterUserResponseDto = new RegisterUserResponseDto();
     response.accessToken = accessToken;
-    response.user = {
-      id: saved.id,
-      name: saved.name,
-      email: saved.email,
-      image: saved.image,
-    };
+    const userDto: RegisterUserResponseUserDto =
+      new RegisterUserResponseUserDto();
+    userDto.id = saved.id;
+    userDto.name = saved.name;
+    userDto.email = saved.email;
+    userDto.image = saved.image;
+    response.user = userDto;
     return response;
   }
 }

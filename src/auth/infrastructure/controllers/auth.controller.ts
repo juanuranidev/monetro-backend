@@ -14,11 +14,12 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-import { LoginRequestDto } from '@auth/application/dtos/request/login-request.dto';
-import { AuthResponseDto } from '@auth/application/dtos/response/auth-response.dto';
-import { SignupRequestDto } from '@auth/application/dtos/request/signup-request.dto';
 import { LoginUserUseCase } from '@auth/application/use-cases/login-user/login-user.use-case';
+import { LoginUserRequestDto } from '@auth/application/dtos/login-user/login-user-request.dto';
 import { RegisterUserUseCase } from '@auth/application/use-cases/register-user/register-user.use-case';
+import { LoginUserResponseDto } from '@auth/application/dtos/login-user/login-user-response.dto';
+import { RegisterUserRequestDto } from '@auth/application/dtos/register-user/register-user-request.dto';
+import { RegisterUserResponseDto } from '@auth/application/dtos/register-user/register-user-response.dto';
 
 import { PublicRoute } from '@core/decorators/public-route.decorator';
 
@@ -44,9 +45,11 @@ export class AuthController {
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user account' })
-  @ApiBody({ type: SignupRequestDto })
-  @ApiCreatedResponse({ type: AuthResponseDto })
-  public signup(@Body() body: SignupRequestDto): Promise<AuthResponseDto> {
+  @ApiBody({ type: RegisterUserRequestDto })
+  @ApiCreatedResponse({ type: RegisterUserResponseDto })
+  public signup(
+    @Body() body: RegisterUserRequestDto,
+  ): Promise<RegisterUserResponseDto> {
     return this.registerUserUseCase.execute(body);
   }
 
@@ -54,9 +57,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate and receive a JWT' })
-  @ApiBody({ type: LoginRequestDto })
-  @ApiOkResponse({ type: AuthResponseDto })
-  public login(@Body() body: LoginRequestDto): Promise<AuthResponseDto> {
+  @ApiBody({ type: LoginUserRequestDto })
+  @ApiOkResponse({ type: LoginUserResponseDto })
+  public login(
+    @Body() body: LoginUserRequestDto,
+  ): Promise<LoginUserResponseDto> {
     return this.loginUserUseCase.execute(body);
   }
 }

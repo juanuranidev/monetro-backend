@@ -9,10 +9,10 @@ import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token'
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
 
 import { Rule } from '@rule/domain/entities/rule';
-import { RuleEntityDto } from '@rule/application/dtos/entity/rule-entity.dto';
 import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
-import type { CreateRuleRequestDto } from '@rule/application/dtos/request/create-rule-request.dto';
+import { CreateRuleResponseDto } from '@rule/application/dtos/create-rule/create-rule-response.dto';
+import type { CreateRuleRequestDto } from '@rule/application/dtos/create-rule/create-rule-request.dto';
 
 @Injectable()
 export class CreateRuleUseCase {
@@ -26,9 +26,9 @@ export class CreateRuleUseCase {
   ) {}
 
   public async execute(
-    userId: string,
     input: CreateRuleRequestDto,
-  ): Promise<RuleEntityDto> {
+  ): Promise<CreateRuleResponseDto> {
+    const userId: string = input.userId;
     const category = await this.categoryRepository.findAccessibleByUser(
       input.targetCategoryId,
       userId,
@@ -51,11 +51,11 @@ export class CreateRuleUseCase {
       userId,
     );
     const saved: Rule = await this.ruleRepository.create(rule);
-    return new RuleEntityDto(
-      saved.id,
-      saved.pattern,
-      saved.targetCategoryId,
-      saved.targetAccountId,
-    );
+    const response: CreateRuleResponseDto = new CreateRuleResponseDto();
+    response.id = saved.id;
+    response.pattern = saved.pattern;
+    response.targetCategoryId = saved.targetCategoryId;
+    response.targetAccountId = saved.targetAccountId;
+    return response;
   }
 }

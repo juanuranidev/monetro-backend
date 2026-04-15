@@ -5,6 +5,7 @@ import {
   HttpCode,
   Controller,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -15,15 +16,14 @@ import {
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 
-import { AccountEntityDto } from '@account/application/dtos/entity/account-entity.dto';
 import { CreateAccountUseCase } from '@account/application/use-cases/create-account/create-account.use-case';
-import { CreateAccountRequestDto } from '@account/application/dtos/request/create-account-request.dto';
+import { CreateAccountRequestDto } from '@account/application/dtos/create-account/create-account-request.dto';
+import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
 
-import type { RequestUser } from '@core/strategies/jwt.strategy';
-
-import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
+import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
 @ApiTags('accounts')
+@UseInterceptors(MergeAuthenticatedUserIdInterceptor)
 @ApiBearerAuth('access-token')
 @Controller('accounts')
 export class AccountController {
@@ -44,11 +44,10 @@ export class AccountController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new account for the current user' })
   @ApiBody({ type: CreateAccountRequestDto })
-  @ApiCreatedResponse({ type: AccountEntityDto })
+  @ApiCreatedResponse({ type: CreateAccountResponseDto })
   public create(
-    @CurrentUser() user: RequestUser,
     @Body() body: CreateAccountRequestDto,
-  ): Promise<AccountEntityDto> {
-    return this.createAccountUseCase.execute(user.userId, body);
+  ): Promise<CreateAccountResponseDto> {
+    return this.createAccountUseCase.execute(body);
   }
 }

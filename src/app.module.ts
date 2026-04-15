@@ -10,6 +10,7 @@ import { AuthModule } from '@auth/auth.module';
 import { CategoryModule } from '@category/category.module';
 
 import { JwtAuthGuard } from '@core/guards/jwt-auth.guard';
+import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
 import { CurrencyModule } from '@currency/currency.module';
 
@@ -67,6 +68,7 @@ import { UserModule } from '@user/user.module';
   controllers: [HealthController],
   providers: [
     DatabaseSeedService,
+    MergeAuthenticatedUserIdInterceptor,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
