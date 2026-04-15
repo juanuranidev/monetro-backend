@@ -1,0 +1,142 @@
+---
+description: Guía para crear casos de uso NestJS (DTOs, dominio, repositorio, módulo, controlador) siguiendo el patrón create-account
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Creación de casos de uso (patrón Monetro)
+
+Referencia concreta: `CreateAccountUseCase` y dependencias bajo `src/account/`. Otro ejemplo más simple (sin repositorio cruzado): `CreateCategoryUseCase` en `src/category/`.
+
+## Arquitectura por capas
+
+| Capa | Ubicación típica | Responsabilidad |
+|------|------------------|-----------------|
+| **Domain** | `src/<bounded-context>/domain/` | Entidad de dominio, **puerto** (`interface` del repositorio), **token** de inyección (`Symbol`) |
+| **Application** | `.../application/dtos/<acción>/`, `.../application/use-cases/<acción>/` | DTOs de entrada/salida, caso de uso (`execute`) |
+| **Infrastructure** | `.../infrastructure/postgres/` (entities, mappers, repositories), `.../infrastructure/controllers/` | TypeORM, adaptador que implementa el puerto, HTTP |
+
+Los imports usan alias `@<context>/...` definidos en `tsconfig.json` (p. ej. `@account/domain/...`).
+
+---
+
+## 1. Entidad de dominio
+
+- Archivo: `src/<context>/domain/entities/<nombre>.ts`
+- Clase con propiedades `readonly` donde aplique; constructor con todos los campos necesarios para persistir y para la lógica del caso de uso.
+- Ejemplo: `Account` con `id`, `name`, `identifier`, `icon`, `excludeFromStats`, `currencyId`, `userId`.
+
+**Si el caso de uso crea filas nuevas:** el `id` suele generarse en el caso de uso con `randomUUID()` de `crypto` (no en el repositorio).
+
+---
+
+## 2. Puerto del repositorio y token
+
+- **Interfaz:** `src/<context>/domain/ports/interface-<context>-repository.ts` (o `i-<context>-repository.ts` según el módulo).
+  - Un método por operación que el dominio necesite; p. ej. `create(entity): Promise<Entity>`.
+  - Para lecturas con reglas de negocio: p. ej. `findOwnedByUser(accountId, userId)`.
+- **Token:** `src/<context>/domain/<context>-repository.token.ts` exporta `export const X_REPOSITORY = Symbol('X_REPOSITORY');`
+- En el caso de uso: `@Inject(X_REPOSITORY) private readonly repo: IXRepository`.
+
+---
+
+## 3. DTO de entrada (`<Action>RequestDto`)
+
+- Carpeta: `src/<context>/application/dtos/<kebab-action>/`
+- Archivo: `<kebab-action>-request.dto.ts`
+- Clase exportada con validadores **class-validator** y anotaciones **Swagger** (`@ApiProperty`, `@ApiPropertyOptional`, `@ApiHideProperty`).
+
+Convenciones observadas en **create account**:
+
+- **`userId`:** Marcado con `@ApiHideProperty()` + `@IsUUID()` para que **no** salga en el OpenAPI público; el valor lo inyecta `MergeAuthenticatedUserIdInterceptor` desde el JWT (`Object.assign(request.body, { userId })`). El controlador del recurso debe llevar `@UseInterceptors(MergeAuthenticatedUserIdInterceptor)` y típicamente `@ApiBearerAuth('access-token')`.
+- Campos obligatorios: `@ApiProperty()` + restricciones (`@IsString()`, `@MinLength(1)`, `@Length(3, 3)`, etc.).
+- Opcionales: `@ApiPropertyOptional()` + `@IsOptional()` + tipo TS opcional (`?`).
+- Normalización en el caso de uso: `.trim()` en strings; booleanos con default `input.flag ?? false`; códigos externos (p. ej. moneda) con `.toUpperCase()` antes de consultar repositorio.
+
+Si el caso de uso **no** requiere `userId` en body, no hace falta el interceptor en ese endpoint (sí puede seguir existiendo en otros métodos del mismo controller).
+
+---
+
+## 4. DTO de salida (`<Action>ResponseDto`)
+
+- Archivo: `<kebab-action>-response.dto.ts` en la misma carpeta del DTO de entrada.
+- Propiedades públicas mutables (`response.id = saved.id`) asignadas en el caso de uso después de persistir.
+- Swagger: `@ApiProperty` / `@ApiPropertyOptional` (p. ej. `format: 'uuid'` para ids).
+- Campos opcionales en dominio (p. ej. `icon`): solo asignar en la respuesta si `saved.icon !== undefined` (u otra condición explícita).
+
+---
+
+## 5. Caso de uso
+
+- Archivo: `src/<context>/application/use-cases/<kebab-action>/<kebab-action>.use-case.ts`
+- Clase `@Injectable()` con método `public async execute(input: XRequestDto): Promise<XResponseDto>`.
+- Dependencias: inyectar repositorios del propio contexto y, si hace falta validación o datos de otro bounded context, el repositorio exportado por ese módulo (ej. `ICurrencyRepository` vía `CURRENCY_REPOSITORY` desde `CurrencyModule`).
+- Errores de regla de negocio esperados: `BadRequestException`, `NotFoundException`, etc., según corresponda.
+- **Import types:** usar `import type { XRequestDto }` para DTOs solo usados como tipo, y `import { XResponseDto }` si se instancia con `new`.
+
+---
+
+## 6. Infraestructura Postgres (TypeORM)
+
+### 6.1 Entidad TypeORM
+
+- `src/<context>/infrastructure/postgres/entities/<entity>.typeorm-entity.ts`
+- `@Entity({ name: '<tabla_snake>' })`, columnas con nombres snake en BD si aplica (`name: 'exclude_from_stats'`).
+- Relaciones `@ManyToOne` + `@JoinColumn` + `@RelationId` para exponer `currencyId` / `userId` como columnas lógicas alineadas al dominio.
+
+### 6.2 Mapper
+
+- `.../mappers/<entity>.mapper.ts`
+- Método estático `fromPostgresToDomain(entity: XTypeOrmEntity): DomainEntity` traduciendo `null` → `undefined` donde el dominio use opcionales.
+
+### 6.3 Repositorio concreto
+
+- `.../repositories/<entity>.typeorm-repository.ts`
+- `@Injectable()`, implementa la interfaz del puerto.
+- `@InjectRepository(XTypeOrmEntity)` + `Repository<XTypeOrmEntity>`.
+- `create`: `this.repository.create({ ... })` mapeando desde la entidad de dominio; `save`; retorno vía `Mapper.fromPostgresToDomain(saved)`.
+
+**Al añadir un nuevo método al puerto:** declararlo en la `interface`, implementarlo en `*TypeOrmRepository`, y usarlo desde el/los caso(s) de uso.
+
+---
+
+## 7. Módulo Nest (`<context>.module.ts`)
+
+- `TypeOrmModule.forFeature([...TypeOrmEntities del contexto])`.
+- `providers`: binding `{ provide: X_REPOSITORY, useClass: XTypeOrmRepository }`, todos los casos de uso del módulo.
+- `controllers`: controladores del contexto.
+- `imports`: otros `YModule` cuyos repositorios o servicios exportados necesites (ej. `CurrencyModule` para resolver moneda por código).
+- `exports`: `[X_REPOSITORY]` si otros módulos deben inyectar el mismo puerto.
+
+Registrar el `XModule` en el módulo raíz de la aplicación si aún no está importado.
+
+---
+
+## 8. Controlador
+
+- `@Controller('<ruta-plural>')`, `@ApiTags('<ruta-plural>')`.
+- Inyectar el caso de uso en el constructor.
+- POST (o verbo que corresponda): `@Body() body: XRequestDto`, delegar en `useCase.execute(body)`.
+- Documentar `@ApiBody`, `@ApiCreatedResponse` / `@ApiOkResponse` con los DTOs.
+- Mantener endpoint `GET admin/test` como smoke test si es la convención del proyecto.
+
+---
+
+## Checklist rápido (nuevo caso de uso “crear X”)
+
+1. [ ] Entidad de dominio y, si aplica, migración/columnas alineadas con `*TypeOrmEntity`.
+2. [ ] Puerto `IXRepository` con `create` (+ otros métodos necesarios).
+3. [ ] Token `X_REPOSITORY`.
+4. [ ] `XRequestDto` / `XResponseDto` con class-validator + Swagger (+ `ApiHideProperty` en `userId` si usa interceptor).
+5. [ ] `XUseCase` con `execute`, UUID en dominio, validaciones y mapeo a respuesta.
+6. [ ] Mapper y repositorio TypeORM; método `create` persiste y devuelve dominio.
+7. [ ] `XModule`: `forFeature`, providers, imports de otros módulos, export del repositorio si aplica.
+8. [ ] `XController`: ruta, interceptor de auth si aplica, Swagger, inyección del caso de uso.
+
+---
+
+## Referencias de código en el repo
+
+- Caso de uso + dependencia cruzada moneda: `src/account/application/use-cases/create-account/create-account.use-case.ts`
+- Interceptor `userId`: `src/core/interceptors/merge-authenticated-user-id.interceptor.ts`
+- Ejemplo sin segundo repositorio: `src/category/application/use-cases/create-category/create-category.use-case.ts`
