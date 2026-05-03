@@ -1,4 +1,4 @@
-import { User } from '@user/domain/entities/user';
+import { User, type UserCreateData } from '@user/domain/entities/user';
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 /**
@@ -32,6 +32,21 @@ export class UserMapper {
       password: domain.passwordHash ?? '',
       authId: domain.authId ?? null,
       image: domain.image ?? null,
+    };
+  }
+
+  /**
+   * Insert without client-assigned `id` (DB generates the primary key).
+   */
+  public static fromCreateDataToPostgresRow(
+    data: UserCreateData,
+  ): Partial<UserTypeOrmEntity> {
+    return {
+      name: data.name,
+      email: data.email,
+      password: data.passwordHash ?? '',
+      authId: data.authId ?? null,
+      image: data.image ?? null,
     };
   }
 }

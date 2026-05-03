@@ -1,8 +1,6 @@
-import { randomUUID } from 'crypto';
-
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
-import { Account } from '@account/domain/entities/account';
+import { type AccountCreateData } from '@account/domain/entities/account';
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
@@ -30,16 +28,15 @@ export class CreateAccountUseCase {
       throw new BadRequestException('Unknown currency code');
     }
     const excludeFromStats: boolean = input.excludeFromStats ?? false;
-    const account: Account = new Account(
-      randomUUID(),
-      input.name.trim(),
-      input.identifier.trim(),
-      input.icon?.trim(),
+    const data: AccountCreateData = {
+      name: input.name.trim(),
+      identifier: input.identifier.trim(),
+      icon: input.icon?.trim(),
       excludeFromStats,
-      currency.id,
-      input.userId,
-    );
-    const saved: Account = await this.accountRepository.create(account);
+      currencyId: currency.id,
+      userId: input.userId,
+    };
+    const saved = await this.accountRepository.create(data);
     const response: CreateAccountResponseDto = new CreateAccountResponseDto();
     response.id = saved.id;
     response.name = saved.name;

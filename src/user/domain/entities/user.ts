@@ -11,3 +11,5 @@ export class User {
     public readonly image: string | undefined,
   ) {}
 }
+
+export type UserCreateData = Omit<InstanceType<typeof User>, 'id'>;

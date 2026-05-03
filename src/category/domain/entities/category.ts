@@ -7,3 +7,5 @@ export class Category {
     public readonly userId: string | undefined,
   ) {}
 }
+
+export type CategoryCreateData = Omit<InstanceType<typeof Category>, 'id'>;

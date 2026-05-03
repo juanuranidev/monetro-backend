@@ -1,8 +1,6 @@
-import { randomUUID } from 'crypto';
-
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Category } from '@category/domain/entities/category';
+import { type CategoryCreateData } from '@category/domain/entities/category';
 import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
 import { CreateCategoryResponseDto } from '@category/application/dtos/create-category/create-category-response.dto';
@@ -19,14 +17,13 @@ export class CreateCategoryUseCase {
     input: CreateCategoryRequestDto,
   ): Promise<CreateCategoryResponseDto> {
     const isDefault: boolean = input.isDefault ?? false;
-    const category: Category = new Category(
-      randomUUID(),
-      input.name.trim(),
-      input.icon?.trim(),
+    const data: CategoryCreateData = {
+      name: input.name.trim(),
+      icon: input.icon?.trim(),
       isDefault,
-      input.userId,
-    );
-    const saved: Category = await this.categoryRepository.create(category);
+      userId: input.userId,
+    };
+    const saved = await this.categoryRepository.create(data);
     const response: CreateCategoryResponseDto = new CreateCategoryResponseDto();
     response.id = saved.id;
     response.name = saved.name;

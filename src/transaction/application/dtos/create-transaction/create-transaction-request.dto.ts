@@ -11,8 +11,10 @@ import {
   Matches,
   IsString,
   IsBoolean,
-  MinLength,
   IsOptional,
+  MinLength,
+  IsArray,
+  ArrayMinSize,
 } from 'class-validator';
 
 export class CreateTransactionRequestDto {
@@ -50,9 +52,15 @@ export class CreateTransactionRequestDto {
   @IsBoolean()
   public excludeFromStats?: boolean;
 
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  public categoryId!: string;
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'At least one category; duplicates are ignored.',
+  })
+  @IsArray()
+  @ArrayMinSize(1, { message: 'At least one categoryId is required' })
+  @IsUUID('4', { each: true })
+  public categoryIds!: string[];
 
   @ApiProperty({ enum: ['INCOME', 'EXPENSE'] })
   @IsString()

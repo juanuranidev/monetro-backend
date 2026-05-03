@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthController } from '@auth/infrastructure/controllers/auth.controller';
-import { LoginUserUseCase } from '@auth/application/use-cases/login-user/login-user.use-case';
-import { RegisterUserUseCase } from '@auth/application/use-cases/register-user/register-user.use-case';
-
+import { LoginUseCase } from '@auth/application/use-cases/login/login.use-case';
+import { RegisterUseCase } from '@auth/application/use-cases/register/register.use-case';
 import { JwtStrategy } from '@core/strategies/jwt.strategy';
-
 import { UserModule } from '@user/user.module';
 
 @Module({
@@ -18,18 +16,19 @@ import { UserModule } from '@user/user.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.getOrThrow<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: Number(
-            config.get<string>('JWT_EXPIRES_SECONDS', `${60 * 60 * 24 * 7}`),
-          ),
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const raw: string = config.get<string>('JWT_EXPIRES_SECONDS', '604800');
+        const expiresIn: number = Number.parseInt(raw, 10);
+        return {
+          secret: config.getOrThrow<string>('JWT_SECRET'),
+          signOptions: {
+            expiresIn: Number.isNaN(expiresIn) ? 604800 : expiresIn,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],
-  providers: [RegisterUserUseCase, LoginUserUseCase, JwtStrategy],
-  exports: [JwtModule, PassportModule, JwtStrategy],
+  providers: [JwtStrategy, RegisterUseCase, LoginUseCase],
 })
 export class AuthModule {}

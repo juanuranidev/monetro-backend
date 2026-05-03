@@ -18,7 +18,11 @@ import { DatabaseSeedService } from '@database/database-seed.service';
 
 import { HealthController } from '@health/health.controller';
 
+import { RuleBaseModule } from '@rule-base/rule-base.module';
+
 import { RuleModule } from '@rule/rule.module';
+
+import { RuleTypeModule } from '@rule-type/rule-type.module';
 
 import { TransactionModule } from '@transaction/transaction.module';
 
@@ -58,6 +62,8 @@ import { UserModule } from '@user/user.module';
       },
     }),
     AuthModule,
+    RuleTypeModule,
+    RuleBaseModule,
     RuleModule,
     UserModule,
     AccountModule,

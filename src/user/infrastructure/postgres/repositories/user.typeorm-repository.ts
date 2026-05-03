@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
-import { User } from '@user/domain/entities/user';
+import { type User, type UserCreateData } from '@user/domain/entities/user';
 import { UserMapper } from '@user/infrastructure/postgres/mappers/user.mapper';
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 import type { IUserRepository } from '@user/domain/ports/i-user-repository';
@@ -36,9 +36,9 @@ export class UserTypeOrmRepository implements IUserRepository {
     return count > 0;
   }
 
-  public async create(user: User): Promise<User> {
+  public async create(data: UserCreateData): Promise<User> {
     const entity: UserTypeOrmEntity = this.repository.create(
-      UserMapper.fromDomainToPostgresRow(user),
+      UserMapper.fromCreateDataToPostgresRow(data),
     );
     const saved: UserTypeOrmEntity = await this.repository.save(entity);
     return UserMapper.fromPostgresToDomain(saved);

@@ -23,6 +23,8 @@
       "@database/*": ["src/database/*"],
       "@health/*": ["src/health/*"],
       "@rule/*": ["src/rule/*"],
+      "@rule-base/*": ["src/rule-base/*"],
+      "@rule-type/*": ["src/rule-type/*"],
       "@shared/*": ["src/shared/*"],
       "@transaction/*": ["src/transaction/*"],
       "@user/*": ["src/user/*"]

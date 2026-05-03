@@ -15,6 +15,13 @@ export class TransactionTypeTypeOrmRepository implements ITransactionTypeReposit
     private readonly repository: Repository<TransactionTypeTypeOrmEntity>,
   ) {}
 
+  public async findAll(): Promise<readonly TransactionType[]> {
+    const rows: TransactionTypeTypeOrmEntity[] = await this.repository.find({
+      order: { code: 'ASC' },
+    });
+    return rows.map((row) => TransactionTypeMapper.fromPostgresToDomain(row));
+  }
+
   public async findByCode(code: string): Promise<TransactionType | undefined> {
     const row: TransactionTypeTypeOrmEntity | null =
       await this.repository.findOne({

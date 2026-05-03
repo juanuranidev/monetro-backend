@@ -9,3 +9,6 @@ export class Account {
     public readonly userId: string,
   ) {}
 }
+
+/** Fields persisted by the DB; `id` is generated (see {@link Account} once saved). */
+export type AccountCreateData = Omit<InstanceType<typeof Account>, 'id'>;

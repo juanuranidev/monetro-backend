@@ -6,6 +6,17 @@ import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  const corsFromEnv: string | undefined = process.env.CORS_ORIGIN;
+  app.enableCors({
+    origin:
+      corsFromEnv === undefined || corsFromEnv === ''
+        ? true
+        : corsFromEnv
+            .split(',')
+            .map((o: string) => o.trim())
+            .filter((o: string) => o.length > 0),
+    credentials: true,
+  });
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({

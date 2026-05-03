@@ -5,10 +5,11 @@ import { TransactionRecordTypeOrmEntity } from '@transaction/infrastructure/post
 
 export class TransactionMapper {
   /**
-   * Maps a Postgres-backed transaction row (TypeORM entity) to the domain model.
+   * Maps a Postgres-backed transaction row and its category id list to the domain model.
    */
   public static fromPostgresToDomain(
     entity: TransactionRecordTypeOrmEntity,
+    categoryIds: readonly string[],
   ): Transaction {
     const recordDate: Date = new Date(`${entity.recordDate}T00:00:00.000Z`);
     return new Transaction(
@@ -17,7 +18,7 @@ export class TransactionMapper {
       entity.description,
       recordDate,
       entity.excludeFromStats,
-      entity.categoryId,
+      categoryIds,
       entity.transactionTypeId,
       entity.currencyId,
       entity.accountId,

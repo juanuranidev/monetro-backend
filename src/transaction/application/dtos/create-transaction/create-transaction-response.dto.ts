@@ -16,8 +16,8 @@ export class CreateTransactionResponseDto {
   @ApiProperty()
   public excludeFromStats!: boolean;
 
-  @ApiProperty({ format: 'uuid' })
-  public categoryId!: string;
+  @ApiProperty({ type: [String], format: 'uuid' })
+  public categoryIds!: string[];
 
   @ApiProperty({ format: 'uuid' })
   public transactionTypeId!: string;

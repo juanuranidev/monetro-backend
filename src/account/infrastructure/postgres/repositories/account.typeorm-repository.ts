@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
 
-import { Account } from '@account/domain/entities/account';
+import { Account, type AccountCreateData } from '@account/domain/entities/account';
 import { AccountMapper } from '@account/infrastructure/postgres/mappers/account.mapper';
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
@@ -15,15 +15,14 @@ export class AccountTypeOrmRepository implements IAccountRepository {
     private readonly repository: Repository<AccountTypeOrmEntity>,
   ) {}
 
-  public async create(domain: Account): Promise<Account> {
+  public async create(data: AccountCreateData): Promise<Account> {
     const entity: AccountTypeOrmEntity = this.repository.create({
-      id: domain.id,
-      name: domain.name,
-      identifier: domain.identifier,
-      icon: domain.icon ?? null,
-      excludeFromStats: domain.excludeFromStats,
-      currencyId: domain.currencyId,
-      userId: domain.userId,
+      name: data.name,
+      identifier: data.identifier,
+      icon: data.icon ?? null,
+      excludeFromStats: data.excludeFromStats,
+      currencyId: data.currencyId,
+      userId: data.userId,
     });
     const saved: AccountTypeOrmEntity = await this.repository.save(entity);
     return AccountMapper.fromPostgresToDomain(saved);

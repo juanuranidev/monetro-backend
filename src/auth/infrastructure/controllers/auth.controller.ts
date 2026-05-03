@@ -1,67 +1,57 @@
-import {
-  Get,
-  Body,
-  Post,
-  HttpCode,
-  Controller,
-  HttpStatus,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import {
   ApiBody,
-  ApiTags,
-  ApiOperation,
-  ApiOkResponse,
   ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 
-import { LoginUserUseCase } from '@auth/application/use-cases/login-user/login-user.use-case';
-import { LoginUserRequestDto } from '@auth/application/dtos/login-user/login-user-request.dto';
-import { RegisterUserUseCase } from '@auth/application/use-cases/register-user/register-user.use-case';
-import { LoginUserResponseDto } from '@auth/application/dtos/login-user/login-user-response.dto';
-import { RegisterUserRequestDto } from '@auth/application/dtos/register-user/register-user-request.dto';
-import { RegisterUserResponseDto } from '@auth/application/dtos/register-user/register-user-response.dto';
-
+import { LoginRequestDto } from '@auth/application/dtos/login/login-request.dto';
+import { LoginResponseDto } from '@auth/application/dtos/login/login-response.dto';
+import { RegisterRequestDto } from '@auth/application/dtos/register/register-request.dto';
+import { RegisterResponseDto } from '@auth/application/dtos/register/register-response.dto';
+import { LoginUseCase } from '@auth/application/use-cases/login/login.use-case';
+import { RegisterUseCase } from '@auth/application/use-cases/register/register.use-case';
 import { PublicRoute } from '@core/decorators/public-route.decorator';
 
+/**
+ * Public HTTP endpoints to register and sign in. The returned JWT is intended for
+ * `Authorization: Bearer` (e.g. after storing the access token in the client).
+ */
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   public constructor(
-    private readonly registerUserUseCase: RegisterUserUseCase,
-    private readonly loginUserUseCase: LoginUserUseCase,
+    private readonly registerUseCase: RegisterUseCase,
+    private readonly loginUseCase: LoginUseCase,
   ) {}
 
   @PublicRoute()
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Smoke test' })
-  @ApiOkResponse({
-    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
-  })
-  public adminTest(): { readonly ok: boolean } {
-    return { ok: true };
-  }
-
-  @PublicRoute()
-  @Post('signup')
+  @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user account' })
-  @ApiBody({ type: RegisterUserRequestDto })
-  @ApiCreatedResponse({ type: RegisterUserResponseDto })
-  public signup(
-    @Body() body: RegisterUserRequestDto,
-  ): Promise<RegisterUserResponseDto> {
-    return this.registerUserUseCase.execute(body);
+  @ApiOperation({
+    summary: 'Create user with email and password, return JWT',
+    description:
+      'Passwords are stored as bcrypt hashes. Use the access token in the Authorization header (Bearer) from the client.',
+  })
+  @ApiBody({ type: RegisterRequestDto })
+  @ApiCreatedResponse({ type: RegisterResponseDto })
+  public register(
+    @Body() body: RegisterRequestDto,
+  ): Promise<RegisterResponseDto> {
+    return this.registerUseCase.execute(body);
   }
 
   @PublicRoute()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Authenticate and receive a JWT' })
-  @ApiBody({ type: LoginUserRequestDto })
-  @ApiOkResponse({ type: LoginUserResponseDto })
-  public login(
-    @Body() body: LoginUserRequestDto,
-  ): Promise<LoginUserResponseDto> {
-    return this.loginUserUseCase.execute(body);
+  @ApiOperation({
+    summary: 'Sign in with email and password, return JWT',
+  })
+  @ApiBody({ type: LoginRequestDto })
+  @ApiOkResponse({ type: LoginResponseDto })
+  public login(@Body() body: LoginRequestDto): Promise<LoginResponseDto> {
+    return this.loginUseCase.execute(body);
   }
 }

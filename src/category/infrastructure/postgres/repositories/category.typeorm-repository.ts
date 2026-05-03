@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
-import { Category } from '@category/domain/entities/category';
+import { type Category, type CategoryCreateData } from '@category/domain/entities/category';
 import { CategoryMapper } from '@category/infrastructure/postgres/mappers/category.mapper';
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
@@ -15,15 +15,9 @@ export class CategoryTypeOrmRepository implements ICategoryRepository {
     private readonly repository: Repository<CategoryTypeOrmEntity>,
   ) {}
 
-  public async create(domain: Category): Promise<Category> {
+  public async create(data: CategoryCreateData): Promise<Category> {
     const entity: CategoryTypeOrmEntity = this.repository.create(
-      CategoryMapper.fromCategoryFieldsToPostgresRowPartial({
-        id: domain.id,
-        name: domain.name,
-        icon: domain.icon,
-        isDefault: domain.isDefault,
-        userId: domain.userId,
-      }),
+      CategoryMapper.fromCategoryCreateData(data),
     );
     const saved: CategoryTypeOrmEntity = await this.repository.save(entity);
     return CategoryMapper.fromPostgresToDomain(saved);
@@ -39,5 +33,17 @@ export class CategoryTypeOrmRepository implements ICategoryRepository {
       .andWhere('(c.user_id IS NULL OR c.user_id = :userId)', { userId })
       .getOne();
     return row === null ? undefined : CategoryMapper.fromPostgresToDomain(row);
+  }
+
+  public async listAccessibleByUser(
+    userId: string,
+  ): Promise<readonly Category[]> {
+    const rows: CategoryTypeOrmEntity[] = await this.repository
+      .createQueryBuilder('c')
+      .where('(c.user_id IS NULL OR c.user_id = :userId)', { userId })
+      .orderBy('c.is_default', 'DESC')
+      .addOrderBy('c.name', 'ASC')
+      .getMany();
+    return rows.map((row) => CategoryMapper.fromPostgresToDomain(row));
   }
 }

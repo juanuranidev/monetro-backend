@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
@@ -13,7 +11,7 @@ import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repo
 
 import { MoneyAmount } from '@shared/domain/value-objects/money-amount';
 
-import { Transaction } from '@transaction/domain/entities/transaction';
+import { type TransactionCreateData } from '@transaction/domain/entities/transaction';
 import { TRANSACTION_REPOSITORY } from '@transaction/domain/transaction-repository.token';
 import { TRANSACTION_TYPE_REPOSITORY } from '@transaction/domain/transaction-type-repository.token';
 import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
@@ -40,12 +38,15 @@ export class CreateTransactionUseCase {
     input: CreateTransactionRequestDto,
   ): Promise<CreateTransactionResponseDto> {
     const userId: string = input.userId;
-    const category = await this.categoryRepository.findAccessibleByUser(
-      input.categoryId,
-      userId,
-    );
-    if (category === undefined) {
-      throw new BadRequestException('Category not found or not accessible');
+    const uniqueCategoryIds: string[] = [...new Set(input.categoryIds)];
+    for (const categoryId of uniqueCategoryIds) {
+      const category = await this.categoryRepository.findAccessibleByUser(
+        categoryId,
+        userId,
+      );
+      if (category === undefined) {
+        throw new BadRequestException('Category not found or not accessible');
+      }
     }
     const account = await this.accountRepository.findOwnedByUser(
       input.accountId,
@@ -82,20 +83,18 @@ export class CreateTransactionUseCase {
     if (Number.isNaN(recordDate.getTime())) {
       throw new BadRequestException('Invalid record date');
     }
-    const transaction: Transaction = new Transaction(
-      randomUUID(),
+    const data: TransactionCreateData = {
       amount,
-      input.description.trim(),
+      description: input.description.trim(),
       recordDate,
       excludeFromStats,
-      input.categoryId,
-      txnType.id,
-      currency.id,
-      input.accountId,
+      categoryIds: uniqueCategoryIds,
+      transactionTypeId: txnType.id,
+      currencyId: currency.id,
+      accountId: input.accountId,
       userId,
-    );
-    const saved: Transaction =
-      await this.transactionRepository.create(transaction);
+    };
+    const saved = await this.transactionRepository.create(data);
     const response: CreateTransactionResponseDto =
       new CreateTransactionResponseDto();
     response.id = saved.id;
@@ -103,7 +102,7 @@ export class CreateTransactionUseCase {
     response.description = saved.description;
     response.recordDate = saved.recordDate.toISOString().slice(0, 10);
     response.excludeFromStats = saved.excludeFromStats;
-    response.categoryId = saved.categoryId;
+    response.categoryIds = [...saved.categoryIds];
     response.transactionTypeId = saved.transactionTypeId;
     response.currencyId = saved.currencyId;
     response.accountId = saved.accountId;

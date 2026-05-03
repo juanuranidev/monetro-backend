@@ -1,4 +1,7 @@
-import { Category } from '@category/domain/entities/category';
+import {
+  Category,
+  type CategoryCreateData,
+} from '@category/domain/entities/category';
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 
 export class CategoryMapper {
@@ -18,19 +21,14 @@ export class CategoryMapper {
   /**
    * Maps explicit category fields (e.g. on create) to a partial Postgres row for TypeORM.
    */
-  public static fromCategoryFieldsToPostgresRowPartial(input: {
-    readonly id: string;
-    readonly name: string;
-    readonly icon: string | undefined;
-    readonly isDefault: boolean;
-    readonly userId: string | undefined;
-  }): Partial<CategoryTypeOrmEntity> {
+  public static fromCategoryCreateData(
+    data: CategoryCreateData,
+  ): Partial<CategoryTypeOrmEntity> {
     return {
-      id: input.id,
-      name: input.name,
-      icon: input.icon ?? null,
-      isDefault: input.isDefault,
-      userId: input.userId ?? null,
+      name: data.name,
+      icon: data.icon ?? null,
+      isDefault: data.isDefault,
+      userId: data.userId ?? null,
     };
   }
 }

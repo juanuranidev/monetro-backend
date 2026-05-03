@@ -1,7 +1,10 @@
-import type { Account } from '@account/domain/entities/account';
+import type {
+  Account,
+  AccountCreateData,
+} from '@account/domain/entities/account';
 
 export interface IAccountRepository {
-  create(account: Account): Promise<Account>;
+  create(data: AccountCreateData): Promise<Account>;
   update(account: Account): Promise<Account>;
   findAllByUserId(userId: string): Promise<Account[]>;
   findOwnedByUser(
