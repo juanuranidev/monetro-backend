@@ -17,14 +17,15 @@ export class CurrencyTypeOrmRepository implements ICurrencyRepository {
 
   public async findAll(): Promise<readonly Currency[]> {
     const rows: CurrencyTypeOrmEntity[] = await this.repository.find({
-      order: { code: 'ASC' },
+      order: { key: 'ASC' },
     });
     return rows.map((row) => CurrencyMapper.fromPostgresToDomain(row));
   }
 
-  public async findByCode(code: string): Promise<Currency | undefined> {
+  public async findByKey(key: string): Promise<Currency | undefined> {
+    const normalized: string = key.trim().toLowerCase();
     const row: CurrencyTypeOrmEntity | null = await this.repository.findOne({
-      where: { code: code.toUpperCase() },
+      where: { key: normalized },
     });
     return row === null ? undefined : CurrencyMapper.fromPostgresToDomain(row);
   }

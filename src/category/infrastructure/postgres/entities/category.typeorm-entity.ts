@@ -3,10 +3,13 @@ import {
   Entity,
   ManyToOne,
   JoinColumn,
+  RelationId,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
 
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
@@ -15,21 +18,21 @@ export class CategoryTypeOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   public id!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: TextFieldLimits.shortLabel })
   public name!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  public icon!: string | null;
+  @Column({ type: 'varchar', length: TextFieldLimits.shortLabel })
+  public icon!: string;
 
-  @Column({ type: 'boolean', default: false, name: 'is_default' })
-  public isDefault!: boolean;
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  public isActive!: boolean;
 
-  @ManyToOne(() => UserTypeOrmEntity, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => UserTypeOrmEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  public user!: UserTypeOrmEntity | null;
+  public user!: UserTypeOrmEntity;
 
-  @Column({ name: 'user_id', type: 'uuid', nullable: true })
-  public userId!: string | null;
+  @RelationId((category: CategoryTypeOrmEntity) => category.user)
+  public userId!: string;
 
   @CreateDateColumn({ name: 'created_at' })
   public createdAt!: Date;

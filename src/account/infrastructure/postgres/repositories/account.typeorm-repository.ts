@@ -3,10 +3,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
 
-import { Account, type AccountCreateData } from '@account/domain/entities/account';
 import { AccountMapper } from '@account/infrastructure/postgres/mappers/account.mapper';
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
+import {
+  Account,
+  type AccountCreateData,
+} from '@account/domain/entities/account';
 
 @Injectable()
 export class AccountTypeOrmRepository implements IAccountRepository {

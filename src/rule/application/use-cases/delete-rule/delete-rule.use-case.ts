@@ -2,6 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
+import { DeleteRuleResponseDto } from '@rule/application/dtos/delete-rule/delete-rule-response.dto';
+import type { DeleteRuleRequestDto } from '@rule/application/dtos/delete-rule/delete-rule-request.dto';
 
 @Injectable()
 export class DeleteRuleUseCase {
@@ -10,17 +12,17 @@ export class DeleteRuleUseCase {
     private readonly ruleRepository: IRuleRepository,
   ) {}
 
-  public async execute(params: {
-    readonly ruleId: string;
-    readonly userId: string;
-  }): Promise<void> {
+  public async execute(
+    input: DeleteRuleRequestDto,
+  ): Promise<DeleteRuleResponseDto> {
     const existing = await this.ruleRepository.findOwnedByUser(
-      params.ruleId,
-      params.userId,
+      input.ruleId,
+      input.userId,
     );
     if (existing === undefined) {
       throw new NotFoundException('Rule not found');
     }
-    await this.ruleRepository.deleteOwned(params.ruleId, params.userId);
+    await this.ruleRepository.deleteOwned(input.ruleId, input.userId);
+    return new DeleteRuleResponseDto();
   }
 }

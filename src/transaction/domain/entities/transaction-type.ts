@@ -1,6 +1,7 @@
 export class TransactionType {
   public constructor(
     public readonly id: string,
-    public readonly code: string,
+    public readonly key: string,
+    public readonly displayNameEs: string,
   ) {}
 }

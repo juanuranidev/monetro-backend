@@ -1,4 +1,5 @@
 import { RuleTypeCatalog } from '@rule-type/domain/entities/rule-type-catalog';
+
 import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
 
 export class RuleTypeCatalogMapper {

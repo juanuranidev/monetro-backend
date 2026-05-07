@@ -1,6 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { RuleTypeKey, RuleBaseKey } from '@rule/application/validation/rule-builtin-keys';
+import {
+  RuleBaseKey,
+  RuleTypeKey,
+} from '@rule/application/validation/rule-builtin-keys';
 
 type RuleMatchInput = {
   readonly pattern: string;
@@ -15,11 +18,13 @@ type RuleMatchInput = {
  * Enforces the matrix (rule type × base) for match and effect fields.
  * Catalog keys are normalized lowercase.
  */
-export function assertRuleTypeBaseShape(params: {
-  readonly ruleTypeKey: string;
-  readonly ruleBaseKey: string;
-  readonly isPairAllowed: boolean;
-} & RuleMatchInput): void {
+export function assertRuleTypeBaseShape(
+  params: {
+    readonly ruleTypeKey: string;
+    readonly ruleBaseKey: string;
+    readonly isPairAllowed: boolean;
+  } & RuleMatchInput,
+): void {
   if (!params.isPairAllowed) {
     throw new BadRequestException(
       'This rule base is not allowed for the selected rule type',
@@ -71,6 +76,11 @@ export function assertRuleTypeBaseShape(params: {
     if (params.effectCategoryIds.length < 1) {
       throw new BadRequestException(
         'Categorization rules need at least one effectCategoryId to apply when matched',
+      );
+    }
+    if (params.effectCategoryIds.length > 5) {
+      throw new BadRequestException(
+        'Categorization rules may assign at most 5 categories',
       );
     }
     if (params.excludesFromStats) {

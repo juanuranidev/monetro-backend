@@ -1,45 +1,35 @@
-import {
-  ApiProperty,
-  ApiHideProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import type { CreateAccountBodyDto } from '@account/application/dtos/create-account/create-account-body.dto';
 
-import {
-  IsUUID,
-  Length,
-  IsString,
-  IsBoolean,
-  MinLength,
-  IsOptional,
-} from 'class-validator';
-
+/**
+ * Input for {@link CreateAccountUseCase}. Built in the controller from {@link CreateAccountBodyDto} and the authenticated user's id.
+ */
 export class CreateAccountRequestDto {
-  @ApiHideProperty()
-  @IsUUID()
   public userId!: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
   public name!: string;
 
-  @ApiProperty({ description: 'Display identifier, e.g. Visa *1234' })
-  @IsString()
-  @MinLength(1)
   public identifier!: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
   public icon?: string;
 
-  @ApiPropertyOptional({ default: false })
-  @IsOptional()
-  @IsBoolean()
   public excludeFromStats?: boolean;
 
-  @ApiProperty({ example: 'USD', minLength: 3, maxLength: 3 })
-  @IsString()
-  @Length(3, 3)
-  public currencyCode!: string;
+  public currencyKey!: string;
+
+  /**
+   * Maps validated HTTP body plus JWT-derived `userId` into use-case input.
+   */
+  public static fromBody(
+    body: CreateAccountBodyDto,
+    userId: string,
+  ): CreateAccountRequestDto {
+    const dto: CreateAccountRequestDto = new CreateAccountRequestDto();
+    dto.userId = userId;
+    dto.name = body.name;
+    dto.identifier = body.identifier;
+    dto.icon = body.icon;
+    dto.excludeFromStats = body.excludeFromStats;
+    dto.currencyKey = body.currencyKey;
+    return dto;
+  }
 }

@@ -17,15 +17,16 @@ export class TransactionTypeTypeOrmRepository implements ITransactionTypeReposit
 
   public async findAll(): Promise<readonly TransactionType[]> {
     const rows: TransactionTypeTypeOrmEntity[] = await this.repository.find({
-      order: { code: 'ASC' },
+      order: { key: 'ASC' },
     });
     return rows.map((row) => TransactionTypeMapper.fromPostgresToDomain(row));
   }
 
-  public async findByCode(code: string): Promise<TransactionType | undefined> {
+  public async findByKey(key: string): Promise<TransactionType | undefined> {
+    const normalized: string = key.trim().toLowerCase();
     const row: TransactionTypeTypeOrmEntity | null =
       await this.repository.findOne({
-        where: { code: code.toUpperCase() },
+        where: { key: normalized },
       });
     return row === null
       ? undefined

@@ -1,78 +1,44 @@
-import {
-  ApiProperty,
-  ApiHideProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import type { CreateTransactionBodyDto } from '@transaction/application/dtos/create-transaction/create-transaction-body.dto';
 
-import {
-  IsIn,
-  IsUUID,
-  Length,
-  Matches,
-  IsString,
-  IsBoolean,
-  IsOptional,
-  MinLength,
-  IsArray,
-  ArrayMinSize,
-} from 'class-validator';
-
+/**
+ * Input for {@link CreateTransactionUseCase}. Built in the controller from {@link CreateTransactionBodyDto} and the authenticated user's id.
+ */
 export class CreateTransactionRequestDto {
-  @ApiHideProperty()
-  @IsUUID()
   public userId!: string;
 
-  @ApiProperty({
-    description:
-      'Amount as a decimal string (max 8 integer digits, 2 fractional). Parsed with exact decimal arithmetic.',
-    example: '99.50',
-  })
-  @IsString()
-  @Matches(/^\d{1,8}(\.\d{1,2})?$/, {
-    message:
-      'amount must be a positive decimal with up to 8 integer digits and 2 decimals',
-  })
   public amount!: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
-  public description!: string;
+  public description?: string;
 
-  @ApiProperty({
-    description: 'Calendar date of the transaction (ISO 8601 date)',
-    example: '2026-04-03',
-  })
-  @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/)
   public recordDate!: string;
 
-  @ApiPropertyOptional({ default: false })
-  @IsOptional()
-  @IsBoolean()
   public excludeFromStats?: boolean;
 
-  @ApiProperty({
-    type: [String],
-    format: 'uuid',
-    description: 'At least one category; duplicates are ignored.',
-  })
-  @IsArray()
-  @ArrayMinSize(1, { message: 'At least one categoryId is required' })
-  @IsUUID('4', { each: true })
   public categoryIds!: string[];
 
-  @ApiProperty({ enum: ['INCOME', 'EXPENSE'] })
-  @IsString()
-  @IsIn(['INCOME', 'EXPENSE'])
-  public transactionTypeCode!: 'INCOME' | 'EXPENSE';
+  public transactionTypeKey!: 'income' | 'expense';
 
-  @ApiProperty({ example: 'USD', minLength: 3, maxLength: 3 })
-  @IsString()
-  @Length(3, 3)
-  public currencyCode!: string;
+  public currencyKey!: string;
 
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
   public accountId!: string;
+
+  /**
+   * Maps validated HTTP body plus JWT-derived `userId` into use-case input.
+   */
+  public static fromBody(
+    body: CreateTransactionBodyDto,
+    userId: string,
+  ): CreateTransactionRequestDto {
+    const dto: CreateTransactionRequestDto = new CreateTransactionRequestDto();
+    dto.userId = userId;
+    dto.amount = body.amount;
+    dto.description = body.description;
+    dto.recordDate = body.recordDate;
+    dto.excludeFromStats = body.excludeFromStats;
+    dto.categoryIds = body.categoryIds;
+    dto.transactionTypeKey = body.transactionTypeKey;
+    dto.currencyKey = body.currencyKey;
+    dto.accountId = body.accountId;
+    return dto;
+  }
 }

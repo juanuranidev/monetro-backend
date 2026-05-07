@@ -1,14 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
+
+import { RULE_TYPE_CATALOG_REPOSITORY } from '@rule-type/domain/rule-type-catalog-repository.token';
+
 import type { IRuleBaseCatalogRepository } from '@rule-base/domain/ports/i-rule-base-catalog-repository';
 
-import { RuleToResourceMapper } from '@rule/application/mappers/rule-to-resource.mapper';
-import { RULE_TYPE_CATALOG_REPOSITORY } from '@rule-type/domain/rule-type-catalog-repository.token';
 import type { IRuleTypeCatalogRepository } from '@rule-type/domain/ports/i-rule-type-catalog-repository';
 
 import type { Rule } from '@rule/domain/entities/rule';
 import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
+import { RuleToResourceMapper } from '@rule/application/mappers/rule-to-resource.mapper';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 import { RuleResourceResponseDto } from '@rule/application/dtos/rule-resource/rule-resource-response.dto';
 import type { GetRulesRequestDto } from '@rule/application/dtos/get-rules/get-rules-request.dto';

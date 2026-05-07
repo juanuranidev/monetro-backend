@@ -5,8 +5,8 @@ export class GetCurrenciesResponseDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
-  @ApiProperty({ example: 'USD' })
-  public code!: string;
+  @ApiProperty({ example: 'usd' })
+  public key!: string;
 
   @ApiProperty({ example: '$' })
   public symbol!: string;

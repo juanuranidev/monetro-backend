@@ -1,8 +1,8 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
 
 import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
 
-import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
+import { Entity, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'rule_type_bases' })
 export class RuleTypeBasePivotTypeOrmEntity {

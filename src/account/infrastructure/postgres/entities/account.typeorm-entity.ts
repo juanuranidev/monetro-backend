@@ -11,6 +11,8 @@ import {
 
 import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
+
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 @Entity({ name: 'accounts' })
@@ -18,13 +20,17 @@ export class AccountTypeOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   public id!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: TextFieldLimits.shortLabel })
   public name!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: TextFieldLimits.shortLabel })
   public identifier!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({
+    type: 'varchar',
+    length: TextFieldLimits.shortLabel,
+    nullable: true,
+  })
   public icon!: string | null;
 
   @Column({ type: 'boolean', default: false, name: 'exclude_from_stats' })

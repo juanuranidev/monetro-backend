@@ -1,7 +1,7 @@
 import { Rule } from '@rule/domain/entities/rule';
+import { RuleTypeKey } from '@rule/application/validation/rule-builtin-keys';
 import { CreateRuleResponseDto } from '@rule/application/dtos/create-rule/create-rule-response.dto';
 import { RuleResourceResponseDto } from '@rule/application/dtos/rule-resource/rule-resource-response.dto';
-import { RuleTypeKey } from '@rule/application/validation/rule-builtin-keys';
 
 /**
  * Maps domain {@link Rule} + catalog keys to API DTOs.
@@ -17,7 +17,7 @@ export class RuleToResourceMapper {
       rule,
       ruleTypeKey,
       ruleBaseKey,
-    ) as CreateRuleResponseDto;
+    );
   }
 
   public static toResource(
@@ -30,7 +30,7 @@ export class RuleToResourceMapper {
       rule,
       ruleTypeKey,
       ruleBaseKey,
-    ) as RuleResourceResponseDto;
+    );
   }
 
   private static fill(

@@ -1,8 +1,10 @@
+import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 import {
   Category,
   type CategoryCreateData,
 } from '@category/domain/entities/category';
-import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
+
+import type { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 export class CategoryMapper {
   /**
@@ -12,9 +14,9 @@ export class CategoryMapper {
     return new Category(
       entity.id,
       entity.name,
-      entity.icon ?? undefined,
-      entity.isDefault,
-      entity.userId ?? undefined,
+      entity.icon,
+      entity.userId,
+      entity.isActive,
     );
   }
 
@@ -26,9 +28,8 @@ export class CategoryMapper {
   ): Partial<CategoryTypeOrmEntity> {
     return {
       name: data.name,
-      icon: data.icon ?? null,
-      isDefault: data.isDefault,
-      userId: data.userId ?? null,
+      icon: data.icon,
+      user: { id: data.userId } as UserTypeOrmEntity,
     };
   }
 }

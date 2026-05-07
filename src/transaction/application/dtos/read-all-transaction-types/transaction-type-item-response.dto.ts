@@ -4,6 +4,9 @@ export class TransactionTypeItemResponseDto {
   @ApiProperty({ format: 'uuid' })
   public id!: string;
 
-  @ApiProperty({ example: 'INCOME' })
-  public code!: string;
+  @ApiProperty({ example: 'income' })
+  public key!: string;
+
+  @ApiProperty({ example: 'Ingreso' })
+  public displayNameEs!: string;
 }

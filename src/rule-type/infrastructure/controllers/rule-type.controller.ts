@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -7,8 +7,12 @@ import {
 } from '@nestjs/swagger';
 
 import { ReadAllRuleTypesUseCase } from '@rule-type/application/use-cases/read-all-rule-types/read-all-rule-types.use-case';
+
+import { ReadAllRuleTypesRequestDto } from '@rule-type/application/dtos/read-all-rule-types/read-all-rule-types-request.dto';
+
 import { ReadAllRuleTypesResponseDto } from '@rule-type/application/dtos/read-all-rule-types/read-all-rule-types-response.dto';
 
+/** Read-only rule-type catalog; no query/body ({@link ReadAllRuleTypesRequestDto} reserved for future filters). */
 @ApiTags('rule-type')
 @ApiBearerAuth('access-token')
 @Controller('rule-type')
@@ -21,6 +25,8 @@ export class RuleTypeController {
   @ApiOperation({ summary: 'List all rule types (intentions)' })
   @ApiOkResponse({ type: ReadAllRuleTypesResponseDto })
   public readAll(): Promise<ReadAllRuleTypesResponseDto> {
-    return this.readAllRuleTypesUseCase.execute();
+    return this.readAllRuleTypesUseCase.execute(
+      new ReadAllRuleTypesRequestDto(),
+    );
   }
 }

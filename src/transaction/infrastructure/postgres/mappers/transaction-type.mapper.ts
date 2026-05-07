@@ -8,6 +8,13 @@ export class TransactionTypeMapper {
   public static fromPostgresToDomain(
     entity: TransactionTypeTypeOrmEntity,
   ): TransactionType {
-    return new TransactionType(entity.id, entity.code.toUpperCase());
+    const keyNormalized: string = entity.key;
+    return new TransactionType(
+      entity.id,
+      keyNormalized,
+      entity.displayNameEs.trim().length > 0
+        ? entity.displayNameEs
+        : keyNormalized,
+    );
   }
 }

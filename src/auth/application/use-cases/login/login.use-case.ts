@@ -1,13 +1,14 @@
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+
 import * as bcrypt from 'bcrypt';
 
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-
-import { LoginRequestDto } from '@auth/application/dtos/login/login-request.dto';
 import { LoginResponseDto } from '@auth/application/dtos/login/login-response.dto';
+import type { LoginRequestDto } from '@auth/application/dtos/login/login-request.dto';
 
 import { JwtPayload } from '@core/strategies/jwt.strategy';
+
 import { User } from '@user/domain/entities/user';
 import { USER_REPOSITORY } from '@user/domain/user-repository.token';
 import type { IUserRepository } from '@user/domain/ports/i-user-repository';

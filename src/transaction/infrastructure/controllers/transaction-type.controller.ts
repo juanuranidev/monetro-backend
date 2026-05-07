@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -8,7 +8,9 @@ import {
 
 import { TransactionTypeItemResponseDto } from '@transaction/application/dtos/read-all-transaction-types/transaction-type-item-response.dto';
 import { ReadAllTransactionTypesUseCase } from '@transaction/application/use-cases/read-all-transaction-types/read-all-transaction-types.use-case';
+import { ReadAllTransactionTypesRequestDto } from '@transaction/application/dtos/read-all-transaction-types/read-all-transaction-types-request.dto';
 
+/** Read-only transaction-type catalog ({@link ReadAllTransactionTypesRequestDto} reserved for future filters). */
 @ApiTags('transaction-type')
 @ApiBearerAuth('access-token')
 @Controller('transaction-type')
@@ -20,7 +22,10 @@ export class TransactionTypeController {
   @Get('read-all')
   @ApiOperation({ summary: 'List all transaction types' })
   @ApiOkResponse({ type: TransactionTypeItemResponseDto, isArray: true })
-  public readAll(): Promise<TransactionTypeItemResponseDto[]> {
-    return this.readAllTransactionTypesUseCase.execute();
+  public async readAll(): Promise<TransactionTypeItemResponseDto[]> {
+    const result = await this.readAllTransactionTypesUseCase.execute(
+      new ReadAllTransactionTypesRequestDto(),
+    );
+    return result.items;
   }
 }

@@ -30,12 +30,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   public handleRequest<TUser>(
     err: Error | undefined,
-    user: TUser,
-    info: Error | undefined,
+    user: TUser | false,
+    info: unknown,
+    _context: ExecutionContext,
+    _status?: number,
   ): TUser {
-    if (err !== undefined || user === undefined) {
-      throw err ?? new UnauthorizedException(info?.message ?? 'Unauthorized');
+    if (err || !user) {
+      const reason: string = this.jwtFailureReason(err, info);
+      throw err || new UnauthorizedException(reason);
     }
     return user;
+  }
+
+  private jwtFailureReason(err: unknown, info: unknown): string {
+    if (typeof info === 'string' && info.length > 0) {
+      return info;
+    }
+    if (info instanceof Error && info.message.length > 0) {
+      return info.message;
+    }
+    if (err instanceof Error && err.message.length > 0) {
+      return err.message;
+    }
+    if (info !== null && typeof info === 'object' && 'message' in info) {
+      const message: unknown = (info as { readonly message?: unknown }).message;
+      if (typeof message === 'string' && message.length > 0) {
+        return message;
+      }
+    }
+    return 'Unauthorized';
   }
 }

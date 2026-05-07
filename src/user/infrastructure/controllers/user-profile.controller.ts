@@ -21,23 +21,14 @@ export class UserProfileController {
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
   ) {}
 
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Smoke test' })
-  @ApiOkResponse({
-    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
-  })
-  public adminTest(): { readonly ok: boolean } {
-    return { ok: true };
-  }
-
   @Get('profile')
   @ApiOperation({ summary: 'Get authenticated user profile' })
   @ApiOkResponse({ type: GetUserProfileResponseDto })
   public getProfile(
     @CurrentUser() user: RequestUser,
   ): Promise<GetUserProfileResponseDto> {
-    const input: GetUserProfileRequestDto = new GetUserProfileRequestDto();
-    input.userId = user.userId;
-    return this.getUserProfileUseCase.execute(input);
+    return this.getUserProfileUseCase.execute(
+      Object.assign(new GetUserProfileRequestDto(), { userId: user.userId }),
+    );
   }
 }

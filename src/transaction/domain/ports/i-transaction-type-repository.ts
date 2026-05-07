@@ -2,5 +2,5 @@ import type { TransactionType } from '@transaction/domain/entities/transaction-t
 
 export interface ITransactionTypeRepository {
   findAll(): Promise<readonly TransactionType[]>;
-  findByCode(code: string): Promise<TransactionType | undefined>;
+  findByKey(key: string): Promise<TransactionType | undefined>;
 }

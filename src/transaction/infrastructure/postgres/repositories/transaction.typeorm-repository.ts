@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
 
+import { TransactionMapper } from '@transaction/infrastructure/postgres/mappers/transaction.mapper';
+import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
+import { TransactionRecordTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction.typeorm-entity';
+import { TransactionCategoryTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-category.typeorm-entity';
 import {
   Transaction,
   type TransactionCreateData,
 } from '@transaction/domain/entities/transaction';
-import { TransactionMapper } from '@transaction/infrastructure/postgres/mappers/transaction.mapper';
-import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
-import { TransactionCategoryTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-category.typeorm-entity';
-import { TransactionRecordTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction.typeorm-entity';
 
 @Injectable()
 export class TransactionRecordTypeOrmRepository implements ITransactionRepository {
@@ -22,39 +22,39 @@ export class TransactionRecordTypeOrmRepository implements ITransactionRepositor
   ) {}
 
   public async create(data: TransactionCreateData): Promise<Transaction> {
-    const recordDateStr: string = data.recordDate.toISOString().slice(0, 10);
     const categoryIds: string[] = this.normalizeCategoryIds(data.categoryIds);
     const entity: TransactionRecordTypeOrmEntity = this.repository.create({
       amount: data.amount.toPersistenceString(),
       description: data.description,
-      recordDate: recordDateStr,
+      recordDate: data.recordDate,
       excludeFromStats: data.excludeFromStats,
       transactionTypeId: data.transactionTypeId,
       currencyId: data.currencyId,
       accountId: data.accountId,
-      userId: data.userId,
     });
-    const saved: TransactionRecordTypeOrmEntity = await this.repository.save(entity);
+    const saved: TransactionRecordTypeOrmEntity =
+      await this.repository.save(entity);
     await this.replaceCategoryLinks(saved.id, categoryIds);
     return TransactionMapper.fromPostgresToDomain(saved, categoryIds);
   }
 
-  public async findAllByUserId(userId: string): Promise<readonly Transaction[]> {
-    const rows: TransactionRecordTypeOrmEntity[] = await this.repository.find({
-      where: { userId },
-      order: { recordDate: 'DESC', createdAt: 'DESC' },
-    });
+  public async findAllByUserId(
+    userId: string,
+  ): Promise<readonly Transaction[]> {
+    const rows: TransactionRecordTypeOrmEntity[] = await this.repository
+      .createQueryBuilder('t')
+      .innerJoin('t.account', 'a')
+      .where('a.user_id = :userId', { userId })
+      .orderBy('t.record_date', 'DESC')
+      .addOrderBy('t.created_at', 'DESC')
+      .getMany();
     if (rows.length === 0) {
       return [];
     }
-    const idMap: Map<string, string[]> = await this.loadCategoryIdsByTransactionIds(
-      rows.map((r) => r.id),
-    );
+    const idMap: Map<string, string[]> =
+      await this.loadCategoryIdsByTransactionIds(rows.map((r) => r.id));
     return rows.map((row) =>
-      TransactionMapper.fromPostgresToDomain(
-        row,
-        idMap.get(row.id) ?? [],
-      ),
+      TransactionMapper.fromPostgresToDomain(row, idMap.get(row.id) ?? []),
     );
   }
 
@@ -62,39 +62,53 @@ export class TransactionRecordTypeOrmRepository implements ITransactionRepositor
     transactionId: string,
     userId: string,
   ): Promise<Transaction | undefined> {
-    const row: TransactionRecordTypeOrmEntity | null =
-      await this.repository.findOne({
-        where: { id: transactionId, userId },
-      });
+    const row: TransactionRecordTypeOrmEntity | null = await this.repository
+      .createQueryBuilder('t')
+      .innerJoin('t.account', 'a')
+      .where('t.id = :transactionId', { transactionId })
+      .andWhere('a.user_id = :userId', { userId })
+      .getOne();
     if (row === null) {
       return undefined;
     }
-    const categoryIds: string[] = await this.loadCategoryIdsForTransaction(row.id);
+    const categoryIds: string[] = await this.loadCategoryIdsForTransaction(
+      row.id,
+    );
     return TransactionMapper.fromPostgresToDomain(row, categoryIds);
   }
 
-  public async update(domain: Transaction): Promise<Transaction> {
+  public async update(
+    domain: Transaction,
+    ownerUserId: string,
+  ): Promise<Transaction> {
+    const entity: TransactionRecordTypeOrmEntity | null = await this.repository
+      .createQueryBuilder('t')
+      .innerJoin('t.account', 'a')
+      .where('t.id = :id', { id: domain.id })
+      .andWhere('a.user_id = :userId', { userId: ownerUserId })
+      .getOne();
+    if (entity === null) {
+      throw new Error('Transaction not found for update');
+    }
     const categoryIds: string[] = this.normalizeCategoryIds(domain.categoryIds);
-    const entity: TransactionRecordTypeOrmEntity =
-      await this.repository.findOneOrFail({
-        where: { id: domain.id, userId: domain.userId },
-      });
-    const recordDateStr: string = domain.recordDate.toISOString().slice(0, 10);
     entity.amount = domain.amount.toPersistenceString();
     entity.description = domain.description;
-    entity.recordDate = recordDateStr;
+    entity.recordDate = domain.recordDate;
     entity.excludeFromStats = domain.excludeFromStats;
     entity.transactionTypeId = domain.transactionTypeId;
     entity.currencyId = domain.currencyId;
     entity.accountId = domain.accountId;
-    const saved: TransactionRecordTypeOrmEntity = await this.repository.save(entity);
+    const saved: TransactionRecordTypeOrmEntity =
+      await this.repository.save(entity);
     await this.replaceCategoryLinks(saved.id, categoryIds);
     return TransactionMapper.fromPostgresToDomain(saved, categoryIds);
   }
 
-  private normalizeCategoryIds(
-    categoryIds: readonly string[],
-  ): string[] {
+  public async countByAccountId(accountId: string): Promise<number> {
+    return this.repository.count({ where: { accountId } });
+  }
+
+  private normalizeCategoryIds(categoryIds: readonly string[]): string[] {
     return [...new Set(categoryIds)].sort();
   }
 
@@ -145,8 +159,9 @@ export class TransactionRecordTypeOrmRepository implements ITransactionRepositor
     if (categoryIds.length === 0) {
       return;
     }
-    const rows: TransactionCategoryTypeOrmEntity[] = categoryIds.map((categoryId) =>
-      this.categoryLinkRepository.create({ transactionId, categoryId }),
+    const rows: TransactionCategoryTypeOrmEntity[] = categoryIds.map(
+      (categoryId) =>
+        this.categoryLinkRepository.create({ transactionId, categoryId }),
     );
     await this.categoryLinkRepository.save(rows);
   }

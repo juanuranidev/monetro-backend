@@ -1,13 +1,4 @@
 import {
-  ApiBody,
-  ApiTags,
-  ApiParam,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiCreatedResponse,
-} from '@nestjs/swagger';
-import {
   Get,
   Body,
   Post,
@@ -17,8 +8,16 @@ import {
   Controller,
   HttpStatus,
   ParseUUIDPipe,
-  UseInterceptors,
 } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiTags,
+  ApiParam,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 
 import { GetAccountUseCase } from '@account/application/use-cases/get-account/get-account.use-case';
 import { GetAccountsUseCase } from '@account/application/use-cases/get-accounts/get-accounts.use-case';
@@ -26,18 +25,18 @@ import { CreateAccountUseCase } from '@account/application/use-cases/create-acco
 import { UpdateAccountUseCase } from '@account/application/use-cases/update-account/update-account.use-case';
 import { GetAccountRequestDto } from '@account/application/dtos/get-account/get-account-request.dto';
 import { UpdateAccountBodyDto } from '@account/application/dtos/update-account/update-account-body.dto';
+import { CreateAccountBodyDto } from '@account/application/dtos/create-account/create-account-body.dto';
 import { GetAccountsRequestDto } from '@account/application/dtos/get-accounts/get-accounts-request.dto';
 import { GetAccountsResponseDto } from '@account/application/dtos/get-accounts/get-accounts-response.dto';
+import { UpdateAccountRequestDto } from '@account/application/dtos/update-account/update-account-request.dto';
 import { CreateAccountRequestDto } from '@account/application/dtos/create-account/create-account-request.dto';
 import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
 
 import type { RequestUser } from '@core/strategies/jwt.strategy';
-import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
 import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('accounts')
-@UseInterceptors(MergeAuthenticatedUserIdInterceptor)
 @ApiBearerAuth('access-token')
 @Controller('accounts')
 export class AccountController {
@@ -48,24 +47,15 @@ export class AccountController {
     private readonly updateAccountUseCase: UpdateAccountUseCase,
   ) {}
 
-  @Get('admin/test')
-  @ApiOperation({ summary: 'Smoke test' })
-  @ApiOkResponse({
-    schema: { type: 'object', properties: { ok: { type: 'boolean' } } },
-  })
-  public adminTest(): { readonly ok: boolean } {
-    return { ok: true };
-  }
-
   @Get()
   @ApiOperation({ summary: 'Get all accounts for the current user' })
   @ApiOkResponse({ type: GetAccountsResponseDto, isArray: true })
   public getAccounts(
     @CurrentUser() user: RequestUser,
   ): Promise<GetAccountsResponseDto[]> {
-    const input: GetAccountsRequestDto = new GetAccountsRequestDto();
-    input.userId = user.userId;
-    return this.getAccountsUseCase.execute(input);
+    return this.getAccountsUseCase.execute(
+      Object.assign(new GetAccountsRequestDto(), { userId: user.userId }),
+    );
   }
 
   @Get(':id')
@@ -76,10 +66,12 @@ export class AccountController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) accountId: string,
     @CurrentUser() user: RequestUser,
   ): Promise<GetAccountsResponseDto> {
-    const input: GetAccountRequestDto = new GetAccountRequestDto();
-    input.accountId = accountId;
-    input.userId = user.userId;
-    return this.getAccountUseCase.execute(input);
+    return this.getAccountUseCase.execute(
+      Object.assign(new GetAccountRequestDto(), {
+        accountId,
+        userId: user.userId,
+      }),
+    );
   }
 
   @Patch(':id')
@@ -93,21 +85,26 @@ export class AccountController {
     @CurrentUser() user: RequestUser,
     @Body() body: UpdateAccountBodyDto,
   ): Promise<CreateAccountResponseDto> {
-    return this.updateAccountUseCase.execute({
-      accountId,
-      userId: user.userId,
-      body,
-    });
+    return this.updateAccountUseCase.execute(
+      Object.assign(new UpdateAccountRequestDto(), {
+        accountId,
+        userId: user.userId,
+        body,
+      }),
+    );
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new account for the current user' })
-  @ApiBody({ type: CreateAccountRequestDto })
+  @ApiBody({ type: CreateAccountBodyDto })
   @ApiCreatedResponse({ type: CreateAccountResponseDto })
   public create(
-    @Body() body: CreateAccountRequestDto,
+    @CurrentUser() user: RequestUser,
+    @Body() body: CreateAccountBodyDto,
   ): Promise<CreateAccountResponseDto> {
-    return this.createAccountUseCase.execute(body);
+    return this.createAccountUseCase.execute(
+      CreateAccountRequestDto.fromBody(body, user.userId),
+    );
   }
 }

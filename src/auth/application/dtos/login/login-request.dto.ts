@@ -1,15 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import type { LoginBodyDto } from '@auth/application/dtos/login/login-body.dto';
 
+/**
+ * Input for {@link LoginUseCase}. Built from {@link LoginBodyDto} after HTTP validation.
+ */
 export class LoginRequestDto {
-  @ApiProperty({ maxLength: 320 })
-  @IsEmail()
-  @MaxLength(320)
   public email!: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(512)
   public password!: string;
+
+  public static fromBody(body: LoginBodyDto): LoginRequestDto {
+    const dto: LoginRequestDto = new LoginRequestDto();
+    dto.email = body.email;
+    dto.password = body.password;
+    return dto;
+  }
 }

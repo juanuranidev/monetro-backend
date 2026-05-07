@@ -13,9 +13,9 @@ import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/
 
 import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
-import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
 
-import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
+import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
 @Entity({ name: 'transactions' })
 export class TransactionRecordTypeOrmEntity {
@@ -25,11 +25,11 @@ export class TransactionRecordTypeOrmEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   public amount!: string;
 
-  @Column({ type: 'varchar', length: 1024 })
+  @Column({ type: 'varchar', length: TextFieldLimits.transactionDescription })
   public description!: string;
 
-  @Column({ type: 'date', name: 'record_date' })
-  public recordDate!: string;
+  @Column({ type: 'timestamptz', name: 'record_date' })
+  public recordDate!: Date;
 
   @Column({ type: 'boolean', default: false, name: 'exclude_from_stats' })
   public excludeFromStats!: boolean;
@@ -54,13 +54,6 @@ export class TransactionRecordTypeOrmEntity {
 
   @RelationId((t: TransactionRecordTypeOrmEntity) => t.account)
   public accountId!: string;
-
-  @ManyToOne(() => UserTypeOrmEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  public user!: UserTypeOrmEntity;
-
-  @RelationId((t: TransactionRecordTypeOrmEntity) => t.user)
-  public userId!: string;
 
   @CreateDateColumn({ name: 'created_at' })
   public createdAt!: Date;

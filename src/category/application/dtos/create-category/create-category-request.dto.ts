@@ -1,34 +1,24 @@
-import {
-  ApiProperty,
-  ApiHideProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import type { CreateCategoryBodyDto } from '@category/application/dtos/create-category/create-category-body.dto';
 
-import {
-  IsUUID,
-  IsString,
-  IsBoolean,
-  MinLength,
-  IsOptional,
-} from 'class-validator';
-
+/**
+ * Input for {@link CreateCategoryUseCase}. Built in the controller from {@link CreateCategoryBodyDto} and the authenticated user's id.
+ */
 export class CreateCategoryRequestDto {
-  @ApiHideProperty()
-  @IsUUID()
   public userId!: string;
-
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
   public name!: string;
+  public icon!: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  public icon?: string;
-
-  @ApiPropertyOptional({ default: false })
-  @IsOptional()
-  @IsBoolean()
-  public isDefault?: boolean;
+  /**
+   * Maps validated HTTP body plus JWT-derived `userId` into use-case input.
+   */
+  public static fromBody(
+    body: CreateCategoryBodyDto,
+    userId: string,
+  ): CreateCategoryRequestDto {
+    const dto: CreateCategoryRequestDto = new CreateCategoryRequestDto();
+    dto.userId = userId;
+    dto.name = body.name;
+    dto.icon = body.icon;
+    return dto;
+  }
 }

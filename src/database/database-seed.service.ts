@@ -1,39 +1,34 @@
 import { InjectDataSource } from '@nestjs/typeorm';
-import { Logger, Injectable, OnModuleInit } from '@nestjs/common';
+import { Logger, Injectable } from '@nestjs/common';
 
-import { IsNull, DataSource } from 'typeorm';
-
-import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
-
-import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
+import { DataSource } from 'typeorm';
 
 import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
 
+import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
+
 import { RuleTypeBasePivotTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-type-base-pivot.typeorm-entity';
 
-import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
 const DEFAULT_CURRENCIES: readonly {
-  readonly code: string;
+  readonly key: string;
   readonly symbol: string;
   readonly name: string;
 }[] = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '\u20AC', name: 'Euro' },
-  { code: 'ARS', symbol: '$', name: 'Argentine Peso' },
+  { key: 'usd', symbol: '$', name: 'US Dollar' },
+  { key: 'eur', symbol: '\u20AC', name: 'Euro' },
+  { key: 'ars', symbol: '$', name: 'Argentine Peso' },
 ] as const;
 
-const DEFAULT_TXN_TYPES: readonly string[] = ['INCOME', 'EXPENSE'] as const;
-
-const DEFAULT_CATEGORIES: readonly {
-  readonly name: string;
-  readonly icon: string;
+const DEFAULT_TXN_TYPES: readonly {
+  readonly key: string;
+  readonly displayNameEs: string;
 }[] = [
-  { name: 'Groceries', icon: 'cart' },
-  { name: 'Salary', icon: 'briefcase' },
-  { name: 'Transfers', icon: 'swap' },
+  { key: 'income', displayNameEs: 'Ingreso' },
+  { key: 'expense', displayNameEs: 'Gasto' },
 ] as const;
 
 const RULE_TYPE_SEEDS: readonly {
@@ -44,7 +39,8 @@ const RULE_TYPE_SEEDS: readonly {
   {
     key: 'categorization',
     name: 'Categorization',
-    description: 'Rules that assign or adjust how transactions are categorized.',
+    description:
+      'Rules that assign or adjust how transactions are categorized.',
   },
   {
     key: 'exclusion',
@@ -73,7 +69,7 @@ const RULE_TYPE_BASE_PAIRS: readonly [string, string][] = [
 ] as const;
 
 @Injectable()
-export class DatabaseSeedService implements OnModuleInit {
+export class DatabaseSeedService {
   private readonly logger = new Logger(DatabaseSeedService.name);
 
   public constructor(
@@ -81,10 +77,13 @@ export class DatabaseSeedService implements OnModuleInit {
     private readonly dataSource: DataSource,
   ) {}
 
-  public async onModuleInit(): Promise<void> {
+  /**
+   * Inserts default currencies, transaction types, and rule catalogs when tables are empty.
+   * Safe to call repeatedly (no-op if data already exists).
+   */
+  public async runCatalogSeeds(): Promise<void> {
     await this.seedCurrencies();
     await this.seedTransactionTypes();
-    await this.seedDefaultCategories();
     await this.seedRuleCatalogs();
   }
 
@@ -96,7 +95,7 @@ export class DatabaseSeedService implements OnModuleInit {
     }
     const rows: CurrencyTypeOrmEntity[] = DEFAULT_CURRENCIES.map((c) =>
       repository.create({
-        code: c.code,
+        key: c.key,
         symbol: c.symbol,
         name: c.name,
       }),
@@ -113,31 +112,14 @@ export class DatabaseSeedService implements OnModuleInit {
     if (existing > 0) {
       return;
     }
-    const rows: TransactionTypeTypeOrmEntity[] = DEFAULT_TXN_TYPES.map((code) =>
-      repository.create({ code }),
-    );
-    await repository.save(rows);
-    this.logger.log(`Seeded ${rows.length} transaction types`);
-  }
-
-  private async seedDefaultCategories(): Promise<void> {
-    const repository = this.dataSource.getRepository(CategoryTypeOrmEntity);
-    const existingDefaults: number = await repository.count({
-      where: { isDefault: true, userId: IsNull() },
-    });
-    if (existingDefaults > 0) {
-      return;
-    }
-    const rows: CategoryTypeOrmEntity[] = DEFAULT_CATEGORIES.map((c) =>
+    const rows: TransactionTypeTypeOrmEntity[] = DEFAULT_TXN_TYPES.map((row) =>
       repository.create({
-        name: c.name,
-        icon: c.icon,
-        isDefault: true,
-        userId: null,
+        key: row.key,
+        displayNameEs: row.displayNameEs,
       }),
     );
     await repository.save(rows);
-    this.logger.log(`Seeded ${rows.length} default categories`);
+    this.logger.log(`Seeded ${rows.length} transaction types`);
   }
 
   private async seedRuleCatalogs(): Promise<void> {
@@ -148,23 +130,25 @@ export class DatabaseSeedService implements OnModuleInit {
     if (existingTypes > 0) {
       return;
     }
-    const typeRows: RuleTypeCatalogTypeOrmEntity[] = RULE_TYPE_SEEDS.map((row) =>
-      typeRepository.create({
-        key: row.key,
-        name: row.name,
-        description: row.description,
-      }),
+    const typeRows: RuleTypeCatalogTypeOrmEntity[] = RULE_TYPE_SEEDS.map(
+      (row) =>
+        typeRepository.create({
+          key: row.key,
+          name: row.name,
+          description: row.description,
+        }),
     );
     const savedTypes: RuleTypeCatalogTypeOrmEntity[] =
       await typeRepository.save(typeRows);
     const baseRepository = this.dataSource.getRepository(
       RuleBaseCatalogTypeOrmEntity,
     );
-    const baseRows: RuleBaseCatalogTypeOrmEntity[] = RULE_BASE_SEEDS.map((row) =>
-      baseRepository.create({
-        key: row.key,
-        name: row.name,
-      }),
+    const baseRows: RuleBaseCatalogTypeOrmEntity[] = RULE_BASE_SEEDS.map(
+      (row) =>
+        baseRepository.create({
+          key: row.key,
+          name: row.name,
+        }),
     );
     const savedBases: RuleBaseCatalogTypeOrmEntity[] =
       await baseRepository.save(baseRows);
@@ -177,8 +161,8 @@ export class DatabaseSeedService implements OnModuleInit {
     const pivotRepository = this.dataSource.getRepository(
       RuleTypeBasePivotTypeOrmEntity,
     );
-    const pivotRows: RuleTypeBasePivotTypeOrmEntity[] = RULE_TYPE_BASE_PAIRS.map(
-      (pair: readonly [string, string]) => {
+    const pivotRows: RuleTypeBasePivotTypeOrmEntity[] =
+      RULE_TYPE_BASE_PAIRS.map((pair: readonly [string, string]) => {
         const typeId: string | undefined = typeIdByKey.get(pair[0]);
         const baseId: string | undefined = baseIdByKey.get(pair[1]);
         if (typeId === undefined || baseId === undefined) {
@@ -188,8 +172,7 @@ export class DatabaseSeedService implements OnModuleInit {
           ruleTypeId: typeId,
           ruleBaseId: baseId,
         });
-      },
-    );
+      });
     await pivotRepository.save(pivotRows);
     this.logger.log(
       `Seeded ${savedTypes.length} rule types, ${savedBases.length} rule bases, ${pivotRows.length} pivot rows`,

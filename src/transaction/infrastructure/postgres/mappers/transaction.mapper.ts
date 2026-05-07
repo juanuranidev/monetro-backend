@@ -11,7 +11,10 @@ export class TransactionMapper {
     entity: TransactionRecordTypeOrmEntity,
     categoryIds: readonly string[],
   ): Transaction {
-    const recordDate: Date = new Date(`${entity.recordDate}T00:00:00.000Z`);
+    const recordDate: Date =
+      entity.recordDate instanceof Date
+        ? entity.recordDate
+        : new Date(entity.recordDate);
     return new Transaction(
       entity.id,
       MoneyAmount.fromString(entity.amount),
@@ -22,7 +25,6 @@ export class TransactionMapper {
       entity.transactionTypeId,
       entity.currencyId,
       entity.accountId,
-      entity.userId,
     );
   }
 }

@@ -3,6 +3,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+import { RuleBaseModule } from '@rule-base/rule-base.module';
+
+import { RuleTypeModule } from '@rule-type/rule-type.module';
+
 import { AccountModule } from '@account/account.module';
 
 import { AuthModule } from '@auth/auth.module';
@@ -10,19 +14,14 @@ import { AuthModule } from '@auth/auth.module';
 import { CategoryModule } from '@category/category.module';
 
 import { JwtAuthGuard } from '@core/guards/jwt-auth.guard';
-import { MergeAuthenticatedUserIdInterceptor } from '@core/interceptors/merge-authenticated-user-id.interceptor';
 
 import { CurrencyModule } from '@currency/currency.module';
 
 import { DatabaseSeedService } from '@database/database-seed.service';
-
-import { HealthController } from '@health/health.controller';
-
-import { RuleBaseModule } from '@rule-base/rule-base.module';
+import { RunCatalogSeedUseCase } from '@database/application/use-cases/run-catalog-seed/run-catalog-seed.use-case';
+import { DatabaseSeedController } from '@database/database-seed.controller';
 
 import { RuleModule } from '@rule/rule.module';
-
-import { RuleTypeModule } from '@rule-type/rule-type.module';
 
 import { TransactionModule } from '@transaction/transaction.module';
 
@@ -38,16 +37,8 @@ import { UserModule } from '@user/user.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const dialect: string = config.get<string>('DB_DIALECT', 'postgres');
-        if (dialect === 'sqlite') {
-          return {
-            type: 'sqlite' as const,
-            database: ':memory:',
-            autoLoadEntities: true,
-            synchronize: true,
-            logging: config.get<string>('TYPEORM_LOGGING', 'false') === 'true',
-          };
-        }
+        const useSsl: boolean =
+          config.get<string>('DB_SSL', 'false') === 'true';
         return {
           type: 'postgres' as const,
           host: config.get<string>('DB_HOST', 'localhost'),
@@ -55,6 +46,7 @@ import { UserModule } from '@user/user.module';
           username: config.get<string>('DB_USER', 'postgres'),
           password: config.get<string>('DB_PASSWORD', 'postgres'),
           database: config.get<string>('DB_NAME', 'monetro'),
+          ssl: useSsl ? { rejectUnauthorized: false } : false,
           autoLoadEntities: true,
           synchronize: config.get<string>('TYPEORM_SYNC', 'false') === 'true',
           logging: config.get<string>('TYPEORM_LOGGING', 'false') === 'true',
@@ -71,10 +63,10 @@ import { UserModule } from '@user/user.module';
     CurrencyModule,
     TransactionModule,
   ],
-  controllers: [HealthController],
+  controllers: [DatabaseSeedController],
   providers: [
     DatabaseSeedService,
-    MergeAuthenticatedUserIdInterceptor,
+    RunCatalogSeedUseCase,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

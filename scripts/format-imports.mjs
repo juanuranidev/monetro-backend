@@ -17,7 +17,6 @@ const ENTITY_PREFIXES = [
   'core',
   'currency',
   'database',
-  'health',
   'rule',
   'shared',
   'transaction',

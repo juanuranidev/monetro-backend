@@ -1,18 +1,21 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Post, HttpCode, Controller, HttpStatus } from '@nestjs/common';
 import {
   ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
   ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
 } from '@nestjs/swagger';
 
+import { LoginUseCase } from '@auth/application/use-cases/login/login.use-case';
+import { LoginBodyDto } from '@auth/application/dtos/login/login-body.dto';
+import { RegisterUseCase } from '@auth/application/use-cases/register/register.use-case';
+import { RegisterBodyDto } from '@auth/application/dtos/register/register-body.dto';
 import { LoginRequestDto } from '@auth/application/dtos/login/login-request.dto';
 import { LoginResponseDto } from '@auth/application/dtos/login/login-response.dto';
 import { RegisterRequestDto } from '@auth/application/dtos/register/register-request.dto';
 import { RegisterResponseDto } from '@auth/application/dtos/register/register-response.dto';
-import { LoginUseCase } from '@auth/application/use-cases/login/login.use-case';
-import { RegisterUseCase } from '@auth/application/use-cases/register/register.use-case';
+
 import { PublicRoute } from '@core/decorators/public-route.decorator';
 
 /**
@@ -35,12 +38,10 @@ export class AuthController {
     description:
       'Passwords are stored as bcrypt hashes. Use the access token in the Authorization header (Bearer) from the client.',
   })
-  @ApiBody({ type: RegisterRequestDto })
+  @ApiBody({ type: RegisterBodyDto })
   @ApiCreatedResponse({ type: RegisterResponseDto })
-  public register(
-    @Body() body: RegisterRequestDto,
-  ): Promise<RegisterResponseDto> {
-    return this.registerUseCase.execute(body);
+  public register(@Body() body: RegisterBodyDto): Promise<RegisterResponseDto> {
+    return this.registerUseCase.execute(RegisterRequestDto.fromBody(body));
   }
 
   @PublicRoute()
@@ -49,9 +50,9 @@ export class AuthController {
   @ApiOperation({
     summary: 'Sign in with email and password, return JWT',
   })
-  @ApiBody({ type: LoginRequestDto })
+  @ApiBody({ type: LoginBodyDto })
   @ApiOkResponse({ type: LoginResponseDto })
-  public login(@Body() body: LoginRequestDto): Promise<LoginResponseDto> {
-    return this.loginUseCase.execute(body);
+  public login(@Body() body: LoginBodyDto): Promise<LoginResponseDto> {
+    return this.loginUseCase.execute(LoginRequestDto.fromBody(body));
   }
 }

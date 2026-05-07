@@ -1,11 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { RuleBaseCatalogItemResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/rule-base-catalog-item-response.dto';
-import { ReadAllRuleBasesResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-response.dto';
-import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
 import type { RuleBaseCatalog } from '@rule-base/domain/entities/rule-base-catalog';
+
+import { ReadAllRuleBasesResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-response.dto';
+
+import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
+
+import { RuleBaseCatalogItemResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/rule-base-catalog-item-response.dto';
+
+import type { ReadAllRuleBasesRequestDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-request.dto';
+
 import type { IRuleBaseCatalogRepository } from '@rule-base/domain/ports/i-rule-base-catalog-repository';
-import type { ReadAllRuleBasesQueryDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-query.dto';
 
 @Injectable()
 export class ReadAllRuleBasesUseCase {
@@ -15,12 +20,12 @@ export class ReadAllRuleBasesUseCase {
   ) {}
 
   public async execute(
-    query: ReadAllRuleBasesQueryDto,
+    input: ReadAllRuleBasesRequestDto,
   ): Promise<ReadAllRuleBasesResponseDto> {
     const bases: readonly RuleBaseCatalog[] =
-      query.ruleTypeKey !== undefined
+      input.ruleTypeKey !== undefined
         ? await this.ruleBaseCatalogRepository.findAllByRuleTypeKey(
-            query.ruleTypeKey,
+            input.ruleTypeKey,
           )
         : await this.ruleBaseCatalogRepository.findAll();
     const data: RuleBaseCatalogItemResponseDto[] = bases.map(

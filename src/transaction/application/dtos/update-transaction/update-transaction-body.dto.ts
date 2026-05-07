@@ -4,40 +4,47 @@ import {
   IsIn,
   IsUUID,
   Length,
+  IsArray,
   Matches,
   IsString,
   IsBoolean,
+  MaxLength,
   IsOptional,
-  MinLength,
-  IsArray,
-  ArrayMinSize,
   ValidateIf,
+  ArrayMinSize,
 } from 'class-validator';
+
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
+import { TransactionTypeKey } from '@shared/domain/constants/transaction-type-keys';
 
 export class UpdateTransactionBodyDto {
   @ApiPropertyOptional({
     description:
-      'Amount as a decimal string (max 8 integer digits, 2 fractional).',
+      'Decimal string; optional leading minus; extra fractional digits truncated.',
     example: '99.50',
   })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{1,8}(\.\d{1,2})?$/, {
+  @Matches(/^-?\d{1,8}(\.\d+)?$/, {
     message:
-      'amount must be a positive decimal with up to 8 integer digits and 2 decimals',
+      'amount must be a decimal with up to 8 integer digits (optional minus)',
   })
   public amount?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: TextFieldLimits.transactionDescription })
   @IsOptional()
   @IsString()
-  @MinLength(1)
+  @MaxLength(TextFieldLimits.transactionDescription)
   public description?: string;
 
-  @ApiPropertyOptional({ example: '2026-04-03' })
+  @ApiPropertyOptional({
+    description:
+      'ISO 8601 with Z/offset, naive local (APP_TIMEZONE), or yyyy-mm-dd.',
+    example: '2026-04-03T15:30:00Z',
+  })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @MaxLength(40)
   public recordDate?: string;
 
   @ApiPropertyOptional()
@@ -56,20 +63,20 @@ export class UpdateTransactionBodyDto {
   @IsUUID('4', { each: true })
   public categoryIds?: string[];
 
-  @ApiPropertyOptional({ enum: ['INCOME', 'EXPENSE'] })
+  @ApiPropertyOptional({ enum: TransactionTypeKey })
   @IsOptional()
   @IsString()
-  @IsIn(['INCOME', 'EXPENSE'])
-  public transactionTypeCode?: 'INCOME' | 'EXPENSE';
+  @IsIn([TransactionTypeKey.income, TransactionTypeKey.expense])
+  public transactionTypeKey?: 'income' | 'expense';
 
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   public accountId?: string;
 
-  @ApiPropertyOptional({ example: 'USD', minLength: 3, maxLength: 3 })
+  @ApiPropertyOptional({ example: 'usd', minLength: 3, maxLength: 3 })
   @IsOptional()
   @IsString()
   @Length(3, 3)
-  public currencyCode?: string;
+  public currencyKey?: string;
 }

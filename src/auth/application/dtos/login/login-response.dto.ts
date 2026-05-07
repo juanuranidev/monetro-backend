@@ -10,7 +10,7 @@ export class LoginResponseDto {
   public accessToken!: string;
 
   @ApiProperty({ enum: ['Bearer'] })
-  public tokenType: 'Bearer' = 'Bearer';
+  public tokenType = 'Bearer' as const;
 
   @ApiProperty({ description: 'Time until the token expires, in seconds' })
   public expiresIn!: number;
@@ -24,5 +24,9 @@ export class LoginResponseDto {
     },
     required: ['id', 'name', 'email'],
   })
-  public user!: { readonly id: string; readonly name: string; readonly email: string };
+  public user!: {
+    readonly id: string;
+    readonly name: string;
+    readonly email: string;
+  };
 }

@@ -1,7 +1,7 @@
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
-import { type AccountCreateData } from '@account/domain/entities/account';
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
+import { type AccountCreateData } from '@account/domain/entities/account';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
 import type { CreateAccountRequestDto } from '@account/application/dtos/create-account/create-account-request.dto';
@@ -21,11 +21,9 @@ export class CreateAccountUseCase {
   public async execute(
     input: CreateAccountRequestDto,
   ): Promise<CreateAccountResponseDto> {
-    const currency = await this.currencyRepository.findByCode(
-      input.currencyCode.toUpperCase(),
-    );
+    const currency = await this.currencyRepository.findByKey(input.currencyKey);
     if (currency === undefined) {
-      throw new BadRequestException('Unknown currency code');
+      throw new BadRequestException('Unknown currency key');
     }
     const excludeFromStats: boolean = input.excludeFromStats ?? false;
     const data: AccountCreateData = {

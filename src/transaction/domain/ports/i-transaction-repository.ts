@@ -10,5 +10,6 @@ export interface ITransactionRepository {
     transactionId: string,
     userId: string,
   ): Promise<Transaction | undefined>;
-  update(transaction: Transaction): Promise<Transaction>;
+  update(transaction: Transaction, ownerUserId: string): Promise<Transaction>;
+  countByAccountId(accountId: string): Promise<number>;
 }

@@ -4,6 +4,8 @@ export interface IRuleBaseCatalogRepository {
   findAll(): Promise<readonly RuleBaseCatalog[]>;
   findByKey(key: string): Promise<RuleBaseCatalog | undefined>;
   findById(id: string): Promise<RuleBaseCatalog | undefined>;
-  findAllByRuleTypeKey(ruleTypeKey: string): Promise<readonly RuleBaseCatalog[]>;
+  findAllByRuleTypeKey(
+    ruleTypeKey: string,
+  ): Promise<readonly RuleBaseCatalog[]>;
   isPairAllowed(ruleTypeKey: string, ruleBaseKey: string): Promise<boolean>;
 }

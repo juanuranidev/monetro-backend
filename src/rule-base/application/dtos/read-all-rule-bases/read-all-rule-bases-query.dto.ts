@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, Matches } from 'class-validator';
+
+import { Matches, IsString, IsOptional } from 'class-validator';
 
 const RULE_KEY_PATTERN: RegExp = /^[a-z][a-z0-9_]*$/;
 

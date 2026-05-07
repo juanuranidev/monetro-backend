@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
 
-import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
 import { RuleMapper } from '@rule/infrastructure/postgres/mappers/rule.mapper';
-import { RuleCategorizationTargetTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-categorization-target.typeorm-entity';
-import { RuleRecordTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-record.typeorm-entity';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
+import { RuleRecordTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-record.typeorm-entity';
+import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
+import { RuleCategorizationTargetTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-categorization-target.typeorm-entity';
 @Injectable()
 export class RuleRecordTypeOrmRepository implements IRuleRepository {
   public constructor(
@@ -36,9 +36,8 @@ export class RuleRecordTypeOrmRepository implements IRuleRepository {
     if (rows.length === 0) {
       return [];
     }
-    const idMap: Map<string, string[]> = await this.loadEffectCategoryIdsByRuleIds(
-      rows.map((r) => r.id),
-    );
+    const idMap: Map<string, string[]> =
+      await this.loadEffectCategoryIdsByRuleIds(rows.map((r) => r.id));
     return rows.map((row) =>
       RuleMapper.fromPostgresToDomain(row, idMap.get(row.id) ?? []),
     );
@@ -62,9 +61,11 @@ export class RuleRecordTypeOrmRepository implements IRuleRepository {
     const effectIds: string[] = this.normalizeEffectCategoryIds(
       domain.effectCategoryIds,
     );
-    const entity: RuleRecordTypeOrmEntity = await this.repository.findOneOrFail({
-      where: { id: domain.id, userId: domain.userId },
-    });
+    const entity: RuleRecordTypeOrmEntity = await this.repository.findOneOrFail(
+      {
+        where: { id: domain.id, userId: domain.userId },
+      },
+    );
     RuleMapper.assignDomainToEntity(entity, domain);
     const saved: RuleRecordTypeOrmEntity = await this.repository.save(entity);
     await this.replaceEffectCategories(saved.id, effectIds);

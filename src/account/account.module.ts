@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, forwardRef } from '@nestjs/common';
 
 import { AccountController } from '@account/infrastructure/controllers/account.controller';
 import { GetAccountUseCase } from '@account/application/use-cases/get-account/get-account.use-case';
@@ -12,13 +12,17 @@ import { AccountTypeOrmRepository } from '@account/infrastructure/postgres/repos
 
 import { CurrencyModule } from '@currency/currency.module';
 
+import { TransactionModule } from '@transaction/transaction.module';
+
 /**
- * Relational storage via TypeORM under infrastructure/postgres (PostgreSQL in
- * production; the same mappings work if TypeORM is pointed at SQLite in tests).
- * For a Mongo-style alternative see infrastructure/mongo/account-mongo.module.ts.
+ * Relational storage via TypeORM under infrastructure/postgres (PostgreSQL).
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([AccountTypeOrmEntity]), CurrencyModule],
+  imports: [
+    TypeOrmModule.forFeature([AccountTypeOrmEntity]),
+    CurrencyModule,
+    forwardRef(() => TransactionModule),
+  ],
   controllers: [AccountController],
   providers: [
     {

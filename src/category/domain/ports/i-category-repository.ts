@@ -5,6 +5,8 @@ import type {
 
 export interface ICategoryRepository {
   create(data: CategoryCreateData): Promise<Category>;
+  update(category: Category): Promise<Category>;
+  softDeleteByIdForUser(categoryId: string, userId: string): Promise<void>;
   findAccessibleByUser(
     categoryId: string,
     userId: string,

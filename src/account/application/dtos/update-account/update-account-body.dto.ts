@@ -34,9 +34,9 @@ export class UpdateAccountBodyDto {
   @IsBoolean()
   public excludeFromStats?: boolean;
 
-  @ApiPropertyOptional({ example: 'USD', minLength: 3, maxLength: 3 })
+  @ApiPropertyOptional({ example: 'usd', minLength: 3, maxLength: 3 })
   @IsOptional()
   @IsString()
   @Length(3, 3)
-  public currencyCode?: string;
+  public currencyKey?: string;
 }

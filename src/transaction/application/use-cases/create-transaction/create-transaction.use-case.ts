@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
@@ -10,14 +11,17 @@ import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token'
 import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
 
 import { MoneyAmount } from '@shared/domain/value-objects/money-amount';
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
+import { parseRecordInstantToUtc } from '@shared/domain/services/parse-record-instant-to-utc';
 
-import { type TransactionCreateData } from '@transaction/domain/entities/transaction';
 import { TRANSACTION_REPOSITORY } from '@transaction/domain/transaction-repository.token';
+import { type TransactionCreateData } from '@transaction/domain/entities/transaction';
 import { TRANSACTION_TYPE_REPOSITORY } from '@transaction/domain/transaction-type-repository.token';
 import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
 import { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
 import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
 import type { CreateTransactionRequestDto } from '@transaction/application/dtos/create-transaction/create-transaction-request.dto';
+import { ApplyActiveRulesToTransactionDraftService } from '@transaction/application/services/apply-active-rules-to-transaction-draft.service';
 
 @Injectable()
 export class CreateTransactionUseCase {
@@ -32,6 +36,8 @@ export class CreateTransactionUseCase {
     private readonly categoryRepository: ICategoryRepository,
     @Inject(ACCOUNT_REPOSITORY)
     private readonly accountRepository: IAccountRepository,
+    private readonly configService: ConfigService,
+    private readonly applyRulesToDraftService: ApplyActiveRulesToTransactionDraftService,
   ) {}
 
   public async execute(
@@ -39,6 +45,16 @@ export class CreateTransactionUseCase {
   ): Promise<CreateTransactionResponseDto> {
     const userId: string = input.userId;
     const uniqueCategoryIds: string[] = [...new Set(input.categoryIds)];
+    const account = await this.accountRepository.findOwnedByUser(
+      input.accountId,
+      userId,
+    );
+    if (account === undefined) {
+      throw new BadRequestException('Account not found for current user');
+    }
+    if (account.userId !== userId) {
+      throw new BadRequestException('Account ownership mismatch');
+    }
     for (const categoryId of uniqueCategoryIds) {
       const category = await this.categoryRepository.findAccessibleByUser(
         categoryId,
@@ -48,26 +64,17 @@ export class CreateTransactionUseCase {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
-    const account = await this.accountRepository.findOwnedByUser(
-      input.accountId,
-      userId,
-    );
-    if (account === undefined) {
-      throw new BadRequestException('Account not found for current user');
-    }
-    const currency = await this.currencyRepository.findByCode(
-      input.currencyCode.toUpperCase(),
-    );
+    const currency = await this.currencyRepository.findByKey(input.currencyKey);
     if (currency === undefined) {
-      throw new BadRequestException('Unknown currency code');
+      throw new BadRequestException('Unknown currency key');
     }
     if (account.currencyId !== currency.id) {
       throw new BadRequestException(
         'Transaction currency must match the account currency',
       );
     }
-    const txnType = await this.transactionTypeRepository.findByCode(
-      input.transactionTypeCode,
+    const txnType = await this.transactionTypeRepository.findByKey(
+      input.transactionTypeKey,
     );
     if (txnType === undefined) {
       throw new BadRequestException('Unknown transaction type');
@@ -78,21 +85,50 @@ export class CreateTransactionUseCase {
     } catch {
       throw new BadRequestException('Invalid monetary amount');
     }
-    const excludeFromStats: boolean = input.excludeFromStats ?? false;
-    const recordDate: Date = new Date(`${input.recordDate}T00:00:00.000Z`);
-    if (Number.isNaN(recordDate.getTime())) {
-      throw new BadRequestException('Invalid record date');
+    let excludeFromStats: boolean = input.excludeFromStats ?? false;
+    const defaultTz: string = this.configService.get<string>(
+      'APP_TIMEZONE',
+      'UTC',
+    );
+    let recordDate: Date;
+    try {
+      recordDate = parseRecordInstantToUtc(input.recordDate, defaultTz);
+    } catch {
+      throw new BadRequestException('Invalid record instant');
+    }
+    const descriptionRaw: string =
+      typeof input.description === 'string' ? input.description.trim() : '';
+    if (descriptionRaw.length > TextFieldLimits.transactionDescription) {
+      throw new BadRequestException('Description too long');
+    }
+    const draftAfterRules = await this.applyRulesToDraftService.execute({
+      userId,
+      description: descriptionRaw,
+      accountId: input.accountId,
+      transactionTypeId: txnType.id,
+      categoryIds: uniqueCategoryIds,
+      excludeFromStats,
+    });
+    excludeFromStats = draftAfterRules.excludeFromStats;
+    const mergedCategoryIds: string[] = draftAfterRules.categoryIds;
+    for (const categoryId of mergedCategoryIds) {
+      const category = await this.categoryRepository.findAccessibleByUser(
+        categoryId,
+        userId,
+      );
+      if (category === undefined) {
+        throw new BadRequestException('Category not found or not accessible');
+      }
     }
     const data: TransactionCreateData = {
       amount,
-      description: input.description.trim(),
+      description: descriptionRaw,
       recordDate,
       excludeFromStats,
-      categoryIds: uniqueCategoryIds,
+      categoryIds: mergedCategoryIds,
       transactionTypeId: txnType.id,
       currencyId: currency.id,
       accountId: input.accountId,
-      userId,
     };
     const saved = await this.transactionRepository.create(data);
     const response: CreateTransactionResponseDto =
@@ -100,7 +136,7 @@ export class CreateTransactionUseCase {
     response.id = saved.id;
     response.amount = saved.amount.toPersistenceString();
     response.description = saved.description;
-    response.recordDate = saved.recordDate.toISOString().slice(0, 10);
+    response.recordDate = saved.recordDate.toISOString();
     response.excludeFromStats = saved.excludeFromStats;
     response.categoryIds = [...saved.categoryIds];
     response.transactionTypeId = saved.transactionTypeId;

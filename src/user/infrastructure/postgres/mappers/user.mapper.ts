@@ -1,5 +1,5 @@
-import { User, type UserCreateData } from '@user/domain/entities/user';
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
+import { User, type UserCreateData } from '@user/domain/entities/user';
 
 /**
  * Maps between domain User and Postgres-backed persistence (TypeORM).

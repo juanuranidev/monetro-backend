@@ -7,7 +7,7 @@ import type { ICategoryRepository } from '@category/domain/ports/i-category-repo
 import type { GetCategoriesRequestDto } from '@category/application/dtos/get-categories/get-categories-request.dto';
 
 /**
- * Returns system default categories and categories owned by the authenticated user.
+ * Returns categories owned by the authenticated user.
  */
 @Injectable()
 export class GetCategoriesUseCase {
@@ -21,18 +21,12 @@ export class GetCategoriesUseCase {
   ): Promise<GetCategoriesResponseDto[]> {
     const categories: readonly Category[] =
       await this.categoryRepository.listAccessibleByUser(input.userId);
-    return categories.map((category: Category) => {
-      const row: GetCategoriesResponseDto = new GetCategoriesResponseDto();
-      row.id = category.id;
-      row.name = category.name;
-      row.isDefault = category.isDefault;
-      if (category.icon !== undefined) {
-        row.icon = category.icon;
-      }
-      if (category.userId !== undefined) {
-        row.userId = category.userId;
-      }
-      return row;
-    });
+    return categories.map((category: Category) =>
+      Object.assign(new GetCategoriesResponseDto(), {
+        id: category.id,
+        name: category.name,
+        icon: category.icon,
+      }),
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategoryResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -7,12 +7,11 @@ export class CreateCategoryResponseDto {
   @ApiProperty()
   public name!: string;
 
-  @ApiPropertyOptional()
-  public icon?: string;
+  @ApiProperty({
+    description: 'Unicode emoji icon (same rules as on create).',
+  })
+  public icon!: string;
 
-  @ApiProperty()
-  public isDefault!: boolean;
-
-  @ApiPropertyOptional({ format: 'uuid' })
-  public userId?: string;
+  @ApiProperty({ format: 'uuid' })
+  public userId!: string;
 }

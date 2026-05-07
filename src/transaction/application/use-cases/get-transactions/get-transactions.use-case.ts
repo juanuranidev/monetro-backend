@@ -24,7 +24,7 @@ export class GetTransactionsUseCase {
       response.id = saved.id;
       response.amount = saved.amount.toPersistenceString();
       response.description = saved.description;
-      response.recordDate = saved.recordDate.toISOString().slice(0, 10);
+      response.recordDate = saved.recordDate.toISOString();
       response.excludeFromStats = saved.excludeFromStats;
       response.categoryIds = [...saved.categoryIds];
       response.transactionTypeId = saved.transactionTypeId;

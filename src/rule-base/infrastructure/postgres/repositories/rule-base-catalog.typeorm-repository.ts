@@ -4,9 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { RuleBaseCatalog } from '@rule-base/domain/entities/rule-base-catalog';
+
 import { RuleBaseCatalogMapper } from '@rule-base/infrastructure/postgres/mappers/rule-base-catalog.mapper';
+
 import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
+
 import { RuleTypeBasePivotTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-type-base-pivot.typeorm-entity';
+
 import type { IRuleBaseCatalogRepository } from '@rule-base/domain/ports/i-rule-base-catalog-repository';
 
 @Injectable()
@@ -19,8 +23,9 @@ export class RuleBaseCatalogTypeOrmRepository implements IRuleBaseCatalogReposit
   ) {}
 
   public async findAll(): Promise<readonly RuleBaseCatalog[]> {
-    const rows: RuleBaseCatalogTypeOrmEntity[] =
-      await this.baseRepository.find({ order: { name: 'ASC' } });
+    const rows: RuleBaseCatalogTypeOrmEntity[] = await this.baseRepository.find(
+      { order: { name: 'ASC' } },
+    );
     return rows.map((row) => RuleBaseCatalogMapper.fromPostgresToDomain(row));
   }
 
@@ -49,11 +54,7 @@ export class RuleBaseCatalogTypeOrmRepository implements IRuleBaseCatalogReposit
     const normalizedKey: string = ruleTypeKey.trim().toLowerCase();
     const rows: RuleBaseCatalogTypeOrmEntity[] = await this.baseRepository
       .createQueryBuilder('base')
-      .innerJoin(
-        'rule_type_bases',
-        'rtb',
-        'rtb.rule_base_id = base.id',
-      )
+      .innerJoin('rule_type_bases', 'rtb', 'rtb.rule_base_id = base.id')
       .innerJoin('rule_types', 'rt', 'rt.id = rtb.rule_type_id')
       .where('rt.key = :ruleTypeKey', { ruleTypeKey: normalizedKey })
       .orderBy('base.name', 'ASC')

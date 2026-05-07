@@ -1,9 +1,17 @@
 import {
   Inject,
   Injectable,
-  BadRequestException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
+
+import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
+
+import { RULE_TYPE_CATALOG_REPOSITORY } from '@rule-type/domain/rule-type-catalog-repository.token';
+
+import type { IRuleBaseCatalogRepository } from '@rule-base/domain/ports/i-rule-base-catalog-repository';
+
+import type { IRuleTypeCatalogRepository } from '@rule-type/domain/ports/i-rule-type-catalog-repository';
 
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
@@ -11,23 +19,22 @@ import type { IAccountRepository } from '@account/domain/ports/interface-account
 import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
 
-import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
-import type { IRuleBaseCatalogRepository } from '@rule-base/domain/ports/i-rule-base-catalog-repository';
-
-import { RuleTypeKey } from '@rule/application/validation/rule-builtin-keys';
-import { assertRuleTypeBaseShape } from '@rule/application/validation/rule-input-validator';
+import { Rule } from '@rule/domain/entities/rule';
+import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
 import { RuleToResourceMapper } from '@rule/application/mappers/rule-to-resource.mapper';
-import { RULE_TYPE_CATALOG_REPOSITORY } from '@rule-type/domain/rule-type-catalog-repository.token';
-import type { IRuleTypeCatalogRepository } from '@rule-type/domain/ports/i-rule-type-catalog-repository';
+import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
+import { assertRuleTypeBaseShape } from '@rule/application/validation/rule-input-validator';
+import { RuleResourceResponseDto } from '@rule/application/dtos/rule-resource/rule-resource-response.dto';
+import type { UpdateRuleRequestDto } from '@rule/application/dtos/update-rule/update-rule-request.dto';
+import {
+  RuleBaseKey,
+  RuleTypeKey,
+} from '@rule/application/validation/rule-builtin-keys';
+
+import type { TransactionTypeKeyValue } from '@shared/domain/constants/transaction-type-keys';
 
 import { TRANSACTION_TYPE_REPOSITORY } from '@transaction/domain/transaction-type-repository.token';
 import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
-
-import { Rule } from '@rule/domain/entities/rule';
-import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
-import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
-import { RuleResourceResponseDto } from '@rule/application/dtos/rule-resource/rule-resource-response.dto';
-import type { UpdateRuleBodyDto } from '@rule/application/dtos/update-rule/update-rule-body.dto';
 
 @Injectable()
 export class UpdateRuleUseCase {
@@ -46,15 +53,11 @@ export class UpdateRuleUseCase {
     private readonly transactionTypeRepository: ITransactionTypeRepository,
   ) {}
 
-  public async execute(params: {
-    readonly ruleId: string;
-    readonly userId: string;
-    readonly body: UpdateRuleBodyDto;
-  }): Promise<RuleResourceResponseDto> {
-    const existing: Rule | undefined = await this.ruleRepository.findOwnedByUser(
-      params.ruleId,
-      params.userId,
-    );
+  public async execute(
+    params: UpdateRuleRequestDto,
+  ): Promise<RuleResourceResponseDto> {
+    const existing: Rule | undefined =
+      await this.ruleRepository.findOwnedByUser(params.ruleId, params.userId);
     if (existing === undefined) {
       throw new NotFoundException('Rule not found');
     }
@@ -68,9 +71,7 @@ export class UpdateRuleUseCase {
       throw new BadRequestException('Rule metadata is inconsistent');
     }
     const name: string =
-      params.body.name !== undefined
-        ? params.body.name.trim()
-        : existing.name;
+      params.body.name !== undefined ? params.body.name.trim() : existing.name;
     const isActive: boolean =
       params.body.isActive !== undefined
         ? params.body.isActive
@@ -102,7 +103,7 @@ export class UpdateRuleUseCase {
     const sourceTransactionTypeId: string | undefined =
       await this.resolveSourceTransactionTypeId(
         ruleBase.key,
-        params.body.matchedTransactionTypeCode,
+        params.body.matchedTransactionTypeKey,
         existing,
       );
     const isPairAllowed: boolean =
@@ -147,21 +148,22 @@ export class UpdateRuleUseCase {
 
   private async resolveSourceTransactionTypeId(
     ruleBaseKey: string,
-    code: 'INCOME' | 'EXPENSE' | undefined,
+    transactionTypeKey: TransactionTypeKeyValue | undefined,
     existing: Rule,
   ): Promise<string | undefined> {
-    if (ruleBaseKey !== 'transaction_type') {
-      if (code !== undefined) {
+    if (ruleBaseKey !== RuleBaseKey.transaction_type) {
+      if (transactionTypeKey !== undefined) {
         throw new BadRequestException(
-          'matchedTransactionTypeCode is only for transaction_type base',
+          'matchedTransactionTypeKey is only for transaction_type base',
         );
       }
       return existing.sourceTransactionTypeId;
     }
-    if (code === undefined) {
+    if (transactionTypeKey === undefined) {
       return existing.sourceTransactionTypeId;
     }
-    const resolved = await this.transactionTypeRepository.findByCode(code);
+    const resolved =
+      await this.transactionTypeRepository.findByKey(transactionTypeKey);
     if (resolved === undefined) {
       throw new BadRequestException('Unknown transaction type');
     }

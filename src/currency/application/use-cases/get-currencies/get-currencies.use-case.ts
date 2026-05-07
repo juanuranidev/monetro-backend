@@ -20,7 +20,7 @@ export class GetCurrenciesUseCase {
     return currencies.map((c) => {
       const row: GetCurrenciesResponseDto = new GetCurrenciesResponseDto();
       row.id = c.id;
-      row.code = c.code;
+      row.key = c.key;
       row.symbol = c.symbol;
       row.name = c.name;
       return row;

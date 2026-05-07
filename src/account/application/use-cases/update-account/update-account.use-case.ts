@@ -10,9 +10,13 @@ import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
 import type { UpdateAccountBodyDto } from '@account/application/dtos/update-account/update-account-body.dto';
+import type { UpdateAccountRequestDto } from '@account/application/dtos/update-account/update-account-request.dto';
 
 import { CURRENCY_REPOSITORY } from '@currency/domain/currency-repository.token';
 import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
+
+import { TRANSACTION_REPOSITORY } from '@transaction/domain/transaction-repository.token';
+import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
 
 /**
  * Updates an account owned by the user. At least one field in the body must be provided.
@@ -24,13 +28,13 @@ export class UpdateAccountUseCase {
     private readonly accountRepository: IAccountRepository,
     @Inject(CURRENCY_REPOSITORY)
     private readonly currencyRepository: ICurrencyRepository,
+    @Inject(TRANSACTION_REPOSITORY)
+    private readonly transactionRepository: ITransactionRepository,
   ) {}
 
-  public async execute(input: {
-    readonly accountId: string;
-    readonly userId: string;
-    readonly body: UpdateAccountBodyDto;
-  }): Promise<CreateAccountResponseDto> {
+  public async execute(
+    input: UpdateAccountRequestDto,
+  ): Promise<CreateAccountResponseDto> {
     const patch: UpdateAccountBodyDto = input.body;
     if (!this.hasPatchFields(patch)) {
       throw new BadRequestException('No fields to update');
@@ -44,12 +48,21 @@ export class UpdateAccountUseCase {
       throw new NotFoundException('Account not found');
     }
     let currencyId: string = existing.currencyId;
-    if (patch.currencyCode !== undefined) {
-      const currency = await this.currencyRepository.findByCode(
-        patch.currencyCode.toUpperCase(),
+    if (patch.currencyKey !== undefined) {
+      const currency = await this.currencyRepository.findByKey(
+        patch.currencyKey,
       );
       if (currency === undefined) {
-        throw new BadRequestException('Unknown currency code');
+        throw new BadRequestException('Unknown currency key');
+      }
+      if (currency.id !== existing.currencyId) {
+        const txnCount: number =
+          await this.transactionRepository.countByAccountId(existing.id);
+        if (txnCount > 0) {
+          throw new BadRequestException(
+            'Cannot change account currency while transactions exist for this account',
+          );
+        }
       }
       currencyId = currency.id;
     }
@@ -96,7 +109,7 @@ export class UpdateAccountUseCase {
       patch.identifier !== undefined ||
       patch.icon !== undefined ||
       patch.excludeFromStats !== undefined ||
-      patch.currencyCode !== undefined
+      patch.currencyKey !== undefined
     );
   }
 }

@@ -1,92 +1,52 @@
-import {
-  ApiProperty,
-  ApiHideProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import type { CreateRuleBodyDto } from '@rule/application/dtos/create-rule/create-rule-body.dto';
 
-import {
-  IsArray,
-  IsBoolean,
-  IsIn,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  MinLength,
-} from 'class-validator';
+import type { TransactionTypeKeyValue } from '@shared/domain/constants/transaction-type-keys';
 
-const SLUG: RegExp = /^[a-z][a-z0-9_]*$/;
-
+/**
+ * Input for {@link CreateRuleUseCase}. Built in the controller from {@link CreateRuleBodyDto} and the authenticated user's id.
+ */
 export class CreateRuleRequestDto {
-  @ApiHideProperty()
-  @IsUUID()
   public userId!: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(1)
   public name!: string;
 
-  @ApiProperty({ example: 'categorization' })
-  @IsString()
-  @Matches(SLUG, { message: 'ruleTypeKey must be a lowercase slug' })
   public ruleTypeKey!: string;
 
-  @ApiProperty({ example: 'keyword' })
-  @IsString()
-  @Matches(SLUG, { message: 'ruleBaseKey must be a lowercase slug' })
   public ruleBaseKey!: string;
 
-  @ApiPropertyOptional({
-    description: 'Text match for keyword base',
-    default: '',
-  })
-  @IsOptional()
-  @IsString()
   public pattern?: string;
 
-  @ApiPropertyOptional({
-    format: 'uuid',
-    description: 'For account base: the account the rule matches on',
-  })
-  @IsOptional()
-  @IsUUID()
   public sourceAccountId?: string;
 
-  @ApiPropertyOptional({
-    format: 'uuid',
-    description: 'For category base: the category the rule matches on',
-  })
-  @IsOptional()
-  @IsUUID()
   public sourceCategoryId?: string;
 
-  @ApiPropertyOptional({ enum: ['INCOME', 'EXPENSE'] })
-  @IsOptional()
-  @IsString()
-  @IsIn(['INCOME', 'EXPENSE'])
-  public matchedTransactionTypeCode?: 'INCOME' | 'EXPENSE';
+  public matchedTransactionTypeKey?: TransactionTypeKeyValue;
 
-  @ApiPropertyOptional({
-    type: [String],
-    format: 'uuid',
-    description: 'Categorization: at least one id (validated in use case)',
-  })
-  @IsOptional()
-  @IsArray()
-  @IsUUID('4', { each: true })
   public effectCategoryIds?: string[];
 
-  @ApiPropertyOptional({
-    description:
-      'Exclusion: whether matching transactions are excluded from stats (default true)',
-  })
-  @IsOptional()
-  @IsBoolean()
   public excludesFromStats?: boolean;
 
-  @ApiPropertyOptional({ default: true })
-  @IsOptional()
-  @IsBoolean()
   public isActive?: boolean;
+
+  /**
+   * Maps validated HTTP body plus JWT-derived `userId` into use-case input.
+   */
+  public static fromBody(
+    body: CreateRuleBodyDto,
+    userId: string,
+  ): CreateRuleRequestDto {
+    const dto: CreateRuleRequestDto = new CreateRuleRequestDto();
+    dto.userId = userId;
+    dto.name = body.name;
+    dto.ruleTypeKey = body.ruleTypeKey;
+    dto.ruleBaseKey = body.ruleBaseKey;
+    dto.pattern = body.pattern;
+    dto.sourceAccountId = body.sourceAccountId;
+    dto.sourceCategoryId = body.sourceCategoryId;
+    dto.matchedTransactionTypeKey = body.matchedTransactionTypeKey;
+    dto.effectCategoryIds = body.effectCategoryIds;
+    dto.excludesFromStats = body.excludesFromStats;
+    dto.isActive = body.isActive;
+    return dto;
+  }
 }

@@ -11,7 +11,8 @@ import type { RequestUser } from '@core/strategies/jwt.strategy';
 
 /**
  * Injects {@link RequestUser.userId} into the request body so DTOs can require
- * `userId` while keeping it out of the JSON payload (set from the JWT after auth).
+ * `userId` while keeping it out of the JSON payload. `request.user` is set by
+ * {@link JwtStrategy} after validating the JWT and loading the user row.
  */
 @Injectable()
 export class MergeAuthenticatedUserIdInterceptor implements NestInterceptor {

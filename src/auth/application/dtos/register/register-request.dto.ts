@@ -1,39 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsString,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import type { RegisterBodyDto } from '@auth/application/dtos/register/register-body.dto';
 
+/**
+ * Input for {@link RegisterUseCase}. Built from {@link RegisterBodyDto} after HTTP validation.
+ */
 export class RegisterRequestDto {
-  @ApiProperty({ minLength: 1, maxLength: 200 })
-  @IsString()
-  @MinLength(1)
-  @MaxLength(200)
   public name!: string;
 
-  @ApiProperty({ maxLength: 320 })
-  @IsEmail()
-  @MaxLength(320)
   public email!: string;
 
-  @ApiProperty({
-    minLength: 8,
-    maxLength: 72,
-    description:
-      '8–72 characters; must include uppercase, lowercase, and a digit. Stored as bcrypt hash.',
-  })
-  @IsString()
-  @MinLength(8)
-  @MaxLength(72)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}$/,
-    {
-      message:
-        'Password must be 8–72 characters and include uppercase, lowercase, and a digit',
-    },
-  )
   public password!: string;
+
+  public static fromBody(body: RegisterBodyDto): RegisterRequestDto {
+    const dto: RegisterRequestDto = new RegisterRequestDto();
+    dto.name = body.name;
+    dto.email = body.email;
+    dto.password = body.password;
+    return dto;
+  }
 }

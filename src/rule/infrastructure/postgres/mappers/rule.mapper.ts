@@ -1,13 +1,13 @@
-import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
-
-import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
-
 import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
 
 import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
 
-import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
+import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
+
+import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
+
 import { RuleRecordTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-record.typeorm-entity';
+import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
 
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
@@ -58,6 +58,8 @@ export class RuleMapper {
     entity.sourceTransactionType =
       data.sourceTransactionTypeId === undefined
         ? null
-        : ({ id: data.sourceTransactionTypeId } as TransactionTypeTypeOrmEntity);
+        : ({
+            id: data.sourceTransactionTypeId,
+          } as TransactionTypeTypeOrmEntity);
   }
 }

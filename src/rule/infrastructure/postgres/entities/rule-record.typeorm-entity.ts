@@ -1,3 +1,7 @@
+import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
+
+import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
+
 import {
   Column,
   Entity,
@@ -13,9 +17,7 @@ import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/
 
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 
-import { RuleBaseCatalogTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-base-catalog.typeorm-entity';
-
-import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
+import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
 
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
@@ -26,7 +28,7 @@ export class RuleRecordTypeOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   public id!: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: TextFieldLimits.shortLabel })
   public name!: string;
 
   @Column({ type: 'boolean', default: true, name: 'is_active' })
@@ -46,27 +48,37 @@ export class RuleRecordTypeOrmEntity {
   @RelationId((rule: RuleRecordTypeOrmEntity) => rule.ruleBase)
   public ruleBaseId!: string;
 
-  @Column({ type: 'varchar', length: 512, default: '' })
+  @Column({
+    type: 'varchar',
+    length: TextFieldLimits.rulePattern,
+    default: '',
+  })
   public pattern!: string;
 
-  @ManyToOne(() => AccountTypeOrmEntity, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => AccountTypeOrmEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'source_account_id' })
   public sourceAccount!: AccountTypeOrmEntity | null;
 
   @RelationId((rule: RuleRecordTypeOrmEntity) => rule.sourceAccount)
   public sourceAccountId!: string | null;
 
-  @ManyToOne(() => CategoryTypeOrmEntity, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => CategoryTypeOrmEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'source_category_id' })
   public sourceCategory!: CategoryTypeOrmEntity | null;
 
   @RelationId((rule: RuleRecordTypeOrmEntity) => rule.sourceCategory)
   public sourceCategoryId!: string | null;
 
-  @ManyToOne(
-    () => TransactionTypeTypeOrmEntity,
-    { onDelete: 'SET NULL', nullable: true },
-  )
+  @ManyToOne(() => TransactionTypeTypeOrmEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'source_transaction_type_id' })
   public sourceTransactionType!: TransactionTypeTypeOrmEntity | null;
 

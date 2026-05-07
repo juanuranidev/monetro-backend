@@ -10,7 +10,10 @@ export class CreateTransactionResponseDto {
   @ApiProperty()
   public description!: string;
 
-  @ApiProperty({ example: '2026-04-03' })
+  @ApiProperty({
+    description: 'UTC instant ISO 8601',
+    example: '2026-04-03T15:30:00.000Z',
+  })
   public recordDate!: string;
 
   @ApiProperty()

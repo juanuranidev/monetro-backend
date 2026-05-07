@@ -11,8 +11,10 @@ export class Transaction {
     public readonly transactionTypeId: string,
     public readonly currencyId: string,
     public readonly accountId: string,
-    public readonly userId: string,
   ) {}
 }
 
-export type TransactionCreateData = Omit<InstanceType<typeof Transaction>, 'id'>;
+export type TransactionCreateData = Omit<
+  InstanceType<typeof Transaction>,
+  'id'
+>;

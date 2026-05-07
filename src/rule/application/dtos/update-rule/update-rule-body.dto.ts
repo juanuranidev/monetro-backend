@@ -1,14 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import {
-  IsArray,
-  IsBoolean,
   IsIn,
-  IsOptional,
-  IsString,
   IsUUID,
+  IsArray,
+  IsString,
+  IsBoolean,
   MinLength,
+  IsOptional,
+  ArrayMaxSize,
 } from 'class-validator';
+
+import { TransactionTypeKey } from '@shared/domain/constants/transaction-type-keys';
 
 export class UpdateRuleBodyDto {
   @ApiPropertyOptional()
@@ -37,15 +40,21 @@ export class UpdateRuleBodyDto {
   @IsUUID()
   public sourceCategoryId?: string;
 
-  @ApiPropertyOptional({ enum: ['INCOME', 'EXPENSE'] })
+  @ApiPropertyOptional({ enum: TransactionTypeKey })
   @IsOptional()
   @IsString()
-  @IsIn(['INCOME', 'EXPENSE'])
-  public matchedTransactionTypeCode?: 'INCOME' | 'EXPENSE';
+  @IsIn([TransactionTypeKey.income, TransactionTypeKey.expense])
+  public matchedTransactionTypeKey?: 'income' | 'expense';
 
-  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description: 'At most 5 category ids for categorization rules',
+    maxItems: 5,
+  })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(5)
   @IsUUID('4', { each: true })
   public effectCategoryIds?: string[];
 

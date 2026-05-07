@@ -1,16 +1,17 @@
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, ConflictException } from '@nestjs/common';
+
 import * as bcrypt from 'bcrypt';
 
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-
-import { RegisterRequestDto } from '@auth/application/dtos/register/register-request.dto';
 import { RegisterResponseDto } from '@auth/application/dtos/register/register-response.dto';
+import type { RegisterRequestDto } from '@auth/application/dtos/register/register-request.dto';
 
 import { JwtPayload } from '@core/strategies/jwt.strategy';
-import { type User, type UserCreateData } from '@user/domain/entities/user';
+
 import { USER_REPOSITORY } from '@user/domain/user-repository.token';
 import type { IUserRepository } from '@user/domain/ports/i-user-repository';
+import { type User, type UserCreateData } from '@user/domain/entities/user';
 
 /**
  * Registers a user with email and password, hashes the password (bcrypt), and

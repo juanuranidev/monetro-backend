@@ -4,8 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { RuleTypeCatalog } from '@rule-type/domain/entities/rule-type-catalog';
+
 import { RuleTypeCatalogMapper } from '@rule-type/infrastructure/postgres/mappers/rule-type-catalog.mapper';
+
 import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres/entities/rule-type-catalog.typeorm-entity';
+
 import type { IRuleTypeCatalogRepository } from '@rule-type/domain/ports/i-rule-type-catalog-repository';
 
 @Injectable()

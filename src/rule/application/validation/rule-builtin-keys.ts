@@ -13,7 +13,5 @@ export const RuleBaseKey = {
   transaction_type: 'transaction_type',
 } as const;
 
-export type RuleTypeKeyValue =
-  (typeof RuleTypeKey)[keyof typeof RuleTypeKey];
-export type RuleBaseKeyValue =
-  (typeof RuleBaseKey)[keyof typeof RuleBaseKey];
+export type RuleTypeKeyValue = (typeof RuleTypeKey)[keyof typeof RuleTypeKey];
+export type RuleBaseKeyValue = (typeof RuleBaseKey)[keyof typeof RuleBaseKey];
