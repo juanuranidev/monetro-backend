@@ -14,19 +14,4 @@ export class RegisterResponseDto {
 
   @ApiProperty({ description: 'Time until the token expires, in seconds' })
   public expiresIn!: number;
-
-  @ApiProperty({
-    type: 'object',
-    properties: {
-      id: { type: 'string', format: 'uuid' },
-      name: { type: 'string' },
-      email: { type: 'string' },
-    },
-    required: ['id', 'name', 'email'],
-  })
-  public user!: {
-    readonly id: string;
-    readonly name: string;
-    readonly email: string;
-  };
 }

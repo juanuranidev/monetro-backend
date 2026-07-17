@@ -1,11 +1,23 @@
 import type { RuleBaseCatalog } from '@rule-base/domain/entities/rule-base-catalog';
 
+import type { RuleBaseFindByIdData } from '@rule-base/domain/ports/types/rule-base-find-by-id-data';
+
+import type { RuleBaseFindByKeyData } from '@rule-base/domain/ports/types/rule-base-find-by-key-data';
+
+import type { RuleBaseIsPairAllowedData } from '@rule-base/domain/ports/types/rule-base-is-pair-allowed-data';
+
+import type { RuleBaseFindAllByRuleTypeKeyData } from '@rule-base/domain/ports/types/rule-base-find-all-by-rule-type-key-data';
+
 export interface IRuleBaseCatalogRepository {
   findAll(): Promise<readonly RuleBaseCatalog[]>;
-  findByKey(key: string): Promise<RuleBaseCatalog | undefined>;
-  findById(id: string): Promise<RuleBaseCatalog | undefined>;
+
+  findByKey(data: RuleBaseFindByKeyData): Promise<RuleBaseCatalog | undefined>;
+
+  findById(data: RuleBaseFindByIdData): Promise<RuleBaseCatalog | undefined>;
+
   findAllByRuleTypeKey(
-    ruleTypeKey: string,
+    data: RuleBaseFindAllByRuleTypeKeyData,
   ): Promise<readonly RuleBaseCatalog[]>;
-  isPairAllowed(ruleTypeKey: string, ruleBaseKey: string): Promise<boolean>;
+
+  isPairAllowed(data: RuleBaseIsPairAllowedData): Promise<boolean>;
 }

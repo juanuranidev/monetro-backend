@@ -28,14 +28,6 @@ export class UserTypeOrmEntity {
 
   @Column({
     type: 'varchar',
-    length: TextFieldLimits.shortLabel,
-    nullable: true,
-    name: 'auth_id',
-  })
-  public authId!: string | null;
-
-  @Column({
-    type: 'varchar',
     length: TextFieldLimits.url,
     nullable: true,
   })

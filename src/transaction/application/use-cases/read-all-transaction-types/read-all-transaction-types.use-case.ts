@@ -21,18 +21,15 @@ export class ReadAllTransactionTypesUseCase {
     const types: readonly TransactionType[] =
       await this.transactionTypeRepository.findAll();
     const items: TransactionTypeItemResponseDto[] = types.map(
-      (row: TransactionType) => {
-        const dto: TransactionTypeItemResponseDto =
-          new TransactionTypeItemResponseDto();
-        dto.id = row.id;
-        dto.key = row.key;
-        dto.displayNameEs = row.displayNameEs;
-        return dto;
-      },
+      (row: TransactionType) =>
+        Object.assign(new TransactionTypeItemResponseDto(), {
+          id: row.id,
+          key: row.key,
+          displayNameEs: row.displayNameEs,
+        }),
     );
-    const response: ReadAllTransactionTypesResponseDto =
-      new ReadAllTransactionTypesResponseDto();
-    response.items = items;
-    return response;
+    return Object.assign(new ReadAllTransactionTypesResponseDto(), {
+      items,
+    });
   }
 }

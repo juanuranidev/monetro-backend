@@ -20,22 +20,21 @@ export class GetAccountUseCase {
     input: GetAccountRequestDto,
   ): Promise<GetAccountsResponseDto> {
     const account: Account | undefined =
-      await this.accountRepository.findOwnedByUser(
-        input.accountId,
-        input.userId,
-      );
+      await this.accountRepository.findOwnedByUser({
+        accountId: input.accountId,
+        userId: input.userId,
+      });
     if (account === undefined) {
       throw new NotFoundException('Account not found');
     }
-    const response: GetAccountsResponseDto = new GetAccountsResponseDto();
-    response.id = account.id;
-    response.name = account.name;
-    response.identifier = account.identifier;
-    response.excludeFromStats = account.excludeFromStats;
-    response.currencyId = account.currencyId;
-    if (account.icon !== undefined) {
-      response.icon = account.icon;
-    }
-    return response;
+
+    return Object.assign(new GetAccountsResponseDto(), {
+      id: account.id,
+      name: account.name,
+      identifier: account.identifier,
+      excludeFromStats: account.excludeFromStats,
+      currencyId: account.currencyId,
+      ...(account.icon !== undefined ? { icon: account.icon } : {}),
+    });
   }
 }

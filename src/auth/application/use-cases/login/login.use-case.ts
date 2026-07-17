@@ -27,16 +27,18 @@ export class LoginUseCase {
 
   public async execute(input: LoginRequestDto): Promise<LoginResponseDto> {
     const email: string = input.email.trim().toLowerCase();
-    const user: User | undefined = await this.userRepository.findByEmail(email);
+    const user: User | undefined = await this.userRepository.findByEmail({
+      email,
+    });
     if (user === undefined) {
       throw this.invalidCredentials();
     }
-    if (user.passwordHash === undefined || user.passwordHash.length < 1) {
+    if (user.password === undefined || user.password.length < 1) {
       throw this.invalidCredentials();
     }
     const passwordOk: boolean = await bcrypt.compare(
       input.password,
-      user.passwordHash,
+      user.password,
     );
     if (passwordOk !== true) {
       throw this.invalidCredentials();
@@ -54,12 +56,11 @@ export class LoginUseCase {
     const accessToken: string = this.jwtService.sign(payload, {
       expiresIn: expiresInSeconds,
     });
-    const r: LoginResponseDto = new LoginResponseDto();
-    r.accessToken = accessToken;
-    r.tokenType = 'Bearer';
-    r.expiresIn = expiresInSeconds;
-    r.user = { id: user.id, name: user.name, email: user.email };
-    return r;
+    return Object.assign(new LoginResponseDto(), {
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: expiresInSeconds,
+    });
   }
 
   private jwtExpiresSeconds(): number {

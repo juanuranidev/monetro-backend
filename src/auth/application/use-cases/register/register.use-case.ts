@@ -9,9 +9,10 @@ import type { RegisterRequestDto } from '@auth/application/dtos/register/registe
 
 import { JwtPayload } from '@core/strategies/jwt.strategy';
 
+import type { User } from '@user/domain/entities/user';
 import { USER_REPOSITORY } from '@user/domain/user-repository.token';
+import type { UserCreateData } from '@user/domain/ports/types/user-create-data';
 import type { IUserRepository } from '@user/domain/ports/i-user-repository';
-import { type User, type UserCreateData } from '@user/domain/entities/user';
 
 /**
  * Registers a user with email and password, hashes the password (bcrypt), and
@@ -31,19 +32,25 @@ export class RegisterUseCase {
   ): Promise<RegisterResponseDto> {
     const name: string = input.name.trim();
     const email: string = input.email.trim().toLowerCase();
-    const emailTaken: boolean = await this.userRepository.existsByEmail(email);
+
+    const emailTaken: boolean = await this.userRepository.existsByEmail({
+      email,
+    });
     if (emailTaken) {
       throw new ConflictException('This email is already registered');
     }
+
     const saltRounds: number = this.resolveBcryptSaltRounds();
-    const passwordHash: string = await bcrypt.hash(input.password, saltRounds);
+    const password: string = await bcrypt.hash(input.password, saltRounds);
+
     const data: UserCreateData = {
       name,
       email,
-      passwordHash,
+      password,
       authId: undefined,
       image: undefined,
     };
+
     const saved: User = await this.userRepository.create(data);
     return this.buildResponse(saved);
   }
@@ -67,12 +74,11 @@ export class RegisterUseCase {
     const accessToken: string = this.jwtService.sign(payload, {
       expiresIn: expiresInSeconds,
     });
-    const r: RegisterResponseDto = new RegisterResponseDto();
-    r.accessToken = accessToken;
-    r.tokenType = 'Bearer';
-    r.expiresIn = expiresInSeconds;
-    r.user = { id: user.id, name: user.name, email: user.email };
-    return r;
+    return Object.assign(new RegisterResponseDto(), {
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: expiresInSeconds,
+    });
   }
 
   private jwtExpiresSeconds(): number {

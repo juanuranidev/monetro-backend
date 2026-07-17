@@ -17,13 +17,13 @@ export class GetCurrenciesUseCase {
   ): Promise<GetCurrenciesResponseDto[]> {
     void input;
     const currencies = await this.currencyRepository.findAll();
-    return currencies.map((c) => {
-      const row: GetCurrenciesResponseDto = new GetCurrenciesResponseDto();
-      row.id = c.id;
-      row.key = c.key;
-      row.symbol = c.symbol;
-      row.name = c.name;
-      return row;
-    });
+    return currencies.map((c) =>
+      Object.assign(new GetCurrenciesResponseDto(), {
+        id: c.id,
+        key: c.key,
+        symbol: c.symbol,
+        name: c.name,
+      }),
+    );
   }
 }

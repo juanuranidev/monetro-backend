@@ -7,6 +7,7 @@ import { Currency } from '@currency/domain/entities/currency';
 import { CurrencyMapper } from '@currency/infrastructure/postgres/mappers/currency.mapper';
 import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 import type { ICurrencyRepository } from '@currency/domain/ports/i-currency-repository';
+import type { CurrencyFindByKeyData } from '@currency/domain/ports/types/currency-find-by-key-data';
 
 @Injectable()
 export class CurrencyTypeOrmRepository implements ICurrencyRepository {
@@ -22,8 +23,10 @@ export class CurrencyTypeOrmRepository implements ICurrencyRepository {
     return rows.map((row) => CurrencyMapper.fromPostgresToDomain(row));
   }
 
-  public async findByKey(key: string): Promise<Currency | undefined> {
-    const normalized: string = key.trim().toLowerCase();
+  public async findByKey(
+    data: CurrencyFindByKeyData,
+  ): Promise<Currency | undefined> {
+    const normalized: string = data.key.trim().toLowerCase();
     const row: CurrencyTypeOrmEntity | null = await this.repository.findOne({
       where: { key: normalized },
     });

@@ -3,13 +3,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
 
+import type { Account } from '@account/domain/entities/account';
 import { AccountMapper } from '@account/infrastructure/postgres/mappers/account.mapper';
 import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/account.typeorm-entity';
+import type { AccountCreateData } from '@account/domain/ports/types/account-create-data';
+import type { AccountUpdateData } from '@account/domain/ports/types/account-update-data';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
-import {
-  Account,
-  type AccountCreateData,
-} from '@account/domain/entities/account';
+import type { AccountListByUserIdData } from '@account/domain/ports/types/account-list-by-user-id-data';
+import type { AccountFindOwnedByUserData } from '@account/domain/ports/types/account-find-owned-by-user-data';
+
+import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
+
+import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
 @Injectable()
 export class AccountTypeOrmRepository implements IAccountRepository {
@@ -24,32 +29,34 @@ export class AccountTypeOrmRepository implements IAccountRepository {
       identifier: data.identifier,
       icon: data.icon ?? null,
       excludeFromStats: data.excludeFromStats,
-      currencyId: data.currencyId,
-      userId: data.userId,
+      currency: { id: data.currencyId } as CurrencyTypeOrmEntity,
+      user: { id: data.userId } as UserTypeOrmEntity,
     });
     const saved: AccountTypeOrmEntity = await this.repository.save(entity);
     return AccountMapper.fromPostgresToDomain(saved);
   }
 
-  public async update(domain: Account): Promise<Account> {
+  public async update(data: AccountUpdateData): Promise<Account> {
     const entity: AccountTypeOrmEntity | null = await this.repository.findOne({
-      where: { id: domain.id, userId: domain.userId },
+      where: { id: data.id, user: { id: data.userId } },
     });
     if (entity === null) {
       throw new NotFoundException('Account not found');
     }
-    entity.name = domain.name;
-    entity.identifier = domain.identifier;
-    entity.icon = domain.icon ?? null;
-    entity.excludeFromStats = domain.excludeFromStats;
-    entity.currencyId = domain.currencyId;
+    entity.name = data.name;
+    entity.identifier = data.identifier;
+    entity.icon = data.icon ?? null;
+    entity.excludeFromStats = data.excludeFromStats;
+    entity.currency = { id: data.currencyId } as CurrencyTypeOrmEntity;
     const saved: AccountTypeOrmEntity = await this.repository.save(entity);
     return AccountMapper.fromPostgresToDomain(saved);
   }
 
-  public async findAllByUserId(userId: string): Promise<Account[]> {
+  public async findAllByUserId(
+    data: AccountListByUserIdData,
+  ): Promise<Account[]> {
     const rows: AccountTypeOrmEntity[] = await this.repository.find({
-      where: { userId },
+      where: { user: { id: data.userId } },
       order: { name: 'ASC' },
     });
     return rows.map((row: AccountTypeOrmEntity) =>
@@ -58,11 +65,10 @@ export class AccountTypeOrmRepository implements IAccountRepository {
   }
 
   public async findOwnedByUser(
-    accountId: string,
-    userId: string,
+    data: AccountFindOwnedByUserData,
   ): Promise<Account | undefined> {
     const row: AccountTypeOrmEntity | null = await this.repository.findOne({
-      where: { id: accountId, userId },
+      where: { id: data.accountId, user: { id: data.userId } },
     });
     return row === null ? undefined : AccountMapper.fromPostgresToDomain(row);
   }

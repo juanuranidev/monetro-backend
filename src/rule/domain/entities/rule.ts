@@ -19,5 +19,3 @@ export class Rule {
     public readonly userId: string,
   ) {}
 }
-
-export type RuleCreateData = Omit<InstanceType<typeof Rule>, 'id'>;

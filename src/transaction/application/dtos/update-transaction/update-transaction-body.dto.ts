@@ -11,7 +11,6 @@ import {
   MaxLength,
   IsOptional,
   ValidateIf,
-  ArrayMinSize,
 } from 'class-validator';
 
 import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
@@ -55,11 +54,11 @@ export class UpdateTransactionBodyDto {
   @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
-    description: 'When set, replaces all categories; at least one id required.',
+    description:
+      'When set, replaces all categories; duplicates are ignored. Empty array clears categories.',
   })
   @ValidateIf((o: UpdateTransactionBodyDto) => o.categoryIds !== undefined)
   @IsArray()
-  @ArrayMinSize(1, { message: 'When provided, categoryIds must be non-empty' })
   @IsUUID('4', { each: true })
   public categoryIds?: string[];
 
@@ -69,10 +68,23 @@ export class UpdateTransactionBodyDto {
   @IsIn([TransactionTypeKey.income, TransactionTypeKey.expense])
   public transactionTypeKey?: 'income' | 'expense';
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'When set to change posting leg, omit creditCardId on the same patch. Sets direct account leg.',
+  })
   @IsOptional()
-  @IsUUID()
+  @IsUUID('4')
   public accountId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'When set to change posting leg, omit accountId on the same patch. Sets credit card leg.',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  public creditCardId?: string;
 
   @ApiPropertyOptional({ example: 'usd', minLength: 3, maxLength: 3 })
   @IsOptional()

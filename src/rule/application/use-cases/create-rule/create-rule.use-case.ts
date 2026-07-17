@@ -20,7 +20,7 @@ import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token'
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
 
 import { RULE_REPOSITORY } from '@rule/domain/rule-repository.token';
-import { type RuleCreateData } from '@rule/domain/entities/rule';
+import { type RuleCreateData } from '@rule/domain/ports/types/rule-create-data';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 import { RuleToResourceMapper } from '@rule/application/mappers/rule-to-resource.mapper';
 import { CreateRuleResponseDto } from '@rule/application/dtos/create-rule/create-rule-response.dto';
@@ -57,23 +57,23 @@ export class CreateRuleUseCase {
     input: CreateRuleRequestDto,
   ): Promise<CreateRuleResponseDto> {
     const userId: string = input.userId;
-    const ruleType = await this.ruleTypeCatalogRepository.findByKey(
-      input.ruleTypeKey,
-    );
+    const ruleType = await this.ruleTypeCatalogRepository.findByKey({
+      key: input.ruleTypeKey,
+    });
     if (ruleType === undefined) {
       throw new NotFoundException('Unknown rule type');
     }
-    const ruleBase = await this.ruleBaseCatalogRepository.findByKey(
-      input.ruleBaseKey,
-    );
+    const ruleBase = await this.ruleBaseCatalogRepository.findByKey({
+      key: input.ruleBaseKey,
+    });
     if (ruleBase === undefined) {
       throw new NotFoundException('Unknown rule base');
     }
     const isPairAllowed: boolean =
-      await this.ruleBaseCatalogRepository.isPairAllowed(
-        ruleType.key,
-        ruleBase.key,
-      );
+      await this.ruleBaseCatalogRepository.isPairAllowed({
+        ruleTypeKey: ruleType.key,
+        ruleBaseKey: ruleBase.key,
+      });
     const pattern: string = (input.pattern ?? '').trim();
     const effectCategoryIds: string[] =
       ruleType.key === RuleTypeKey.categorization
@@ -120,10 +120,9 @@ export class CreateRuleUseCase {
       userId,
     };
     const saved = await this.ruleRepository.create(data);
-    return RuleToResourceMapper.toCreateResponse(
-      saved,
-      ruleType.key,
-      ruleBase.key,
+    return Object.assign(
+      new CreateRuleResponseDto(),
+      RuleToResourceMapper.responseProps(saved, ruleType.key, ruleBase.key),
     );
   }
 
@@ -142,8 +141,9 @@ export class CreateRuleUseCase {
     if (transactionTypeKey === undefined) {
       return undefined;
     }
-    const resolved =
-      await this.transactionTypeRepository.findByKey(transactionTypeKey);
+    const resolved = await this.transactionTypeRepository.findByKey({
+      key: transactionTypeKey,
+    });
     if (resolved === undefined) {
       throw new BadRequestException('Unknown transaction type');
     }
@@ -157,28 +157,28 @@ export class CreateRuleUseCase {
     readonly sourceCategoryId: string | undefined;
   }): Promise<void> {
     for (const categoryId of params.effectCategoryIds) {
-      const c = await this.categoryRepository.findAccessibleByUser(
+      const c = await this.categoryRepository.findAccessibleByUser({
         categoryId,
-        params.userId,
-      );
+        userId: params.userId,
+      });
       if (c === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
     if (params.sourceCategoryId !== undefined) {
-      const c = await this.categoryRepository.findAccessibleByUser(
-        params.sourceCategoryId,
-        params.userId,
-      );
+      const c = await this.categoryRepository.findAccessibleByUser({
+        categoryId: params.sourceCategoryId,
+        userId: params.userId,
+      });
       if (c === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
     if (params.sourceAccountId !== undefined) {
-      const a = await this.accountRepository.findOwnedByUser(
-        params.sourceAccountId,
-        params.userId,
-      );
+      const a = await this.accountRepository.findOwnedByUser({
+        accountId: params.sourceAccountId,
+        userId: params.userId,
+      });
       if (a === undefined) {
         throw new BadRequestException('Account not found for current user');
       }

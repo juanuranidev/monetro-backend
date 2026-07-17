@@ -1,3 +1,5 @@
+import { CreditCardTypeOrmEntity } from '@credit-card/infrastructure/postgres/entities/credit-card.typeorm-entity';
+
 import {
   Column,
   Entity,
@@ -48,12 +50,22 @@ export class TransactionRecordTypeOrmEntity {
   @RelationId((t: TransactionRecordTypeOrmEntity) => t.currency)
   public currencyId!: string;
 
-  @ManyToOne(() => AccountTypeOrmEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => AccountTypeOrmEntity, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'account_id' })
-  public account!: AccountTypeOrmEntity;
+  public account!: AccountTypeOrmEntity | null;
 
   @RelationId((t: TransactionRecordTypeOrmEntity) => t.account)
-  public accountId!: string;
+  public accountId!: string | null;
+
+  @ManyToOne(() => CreditCardTypeOrmEntity, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'credit_card_id' })
+  public creditCard!: CreditCardTypeOrmEntity | null;
+
+  @RelationId((t: TransactionRecordTypeOrmEntity) => t.creditCard)
+  public creditCardId!: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   public createdAt!: Date;

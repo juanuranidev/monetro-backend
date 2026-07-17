@@ -32,9 +32,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     err: Error | undefined,
     user: TUser | false,
     info: unknown,
-    _context: ExecutionContext,
-    _status?: number,
+    context: ExecutionContext,
+    status?: number,
   ): TUser {
+    void context;
+    void status;
     if (err || !user) {
       const reason: string = this.jwtFailureReason(err, info);
       throw err || new UnauthorizedException(reason);

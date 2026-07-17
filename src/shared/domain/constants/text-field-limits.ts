@@ -12,4 +12,10 @@ export const TextFieldLimits = {
   currencySymbol: 8,
   currencyName: 128,
   transactionTypeKey: 32,
+
+  /** Credit card catalog keys (brand / tier), similar to {@link ruleCatalogKey}. */
+  creditCardCatalogKey: 64,
+
+  /** Last six digits (PCI: never store full PAN). */
+  creditCardLastSixDigits: 6,
 } as const;

@@ -11,8 +11,5 @@ export class GetUserProfileResponseDto {
   public email!: string;
 
   @ApiPropertyOptional()
-  public authId?: string;
-
-  @ApiPropertyOptional()
   public image?: string;
 }

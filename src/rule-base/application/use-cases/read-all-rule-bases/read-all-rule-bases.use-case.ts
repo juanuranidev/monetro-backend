@@ -2,8 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { RuleBaseCatalog } from '@rule-base/domain/entities/rule-base-catalog';
 
-import { ReadAllRuleBasesResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-response.dto';
-
 import { RULE_BASE_CATALOG_REPOSITORY } from '@rule-base/domain/rule-base-catalog-repository.token';
 
 import { RuleBaseCatalogItemResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/rule-base-catalog-item-response.dto';
@@ -21,31 +19,23 @@ export class ReadAllRuleBasesUseCase {
 
   public async execute(
     input: ReadAllRuleBasesRequestDto,
-  ): Promise<ReadAllRuleBasesResponseDto> {
+  ): Promise<RuleBaseCatalogItemResponseDto[]> {
     const bases: readonly RuleBaseCatalog[] =
       input.ruleTypeKey !== undefined
-        ? await this.ruleBaseCatalogRepository.findAllByRuleTypeKey(
-            input.ruleTypeKey,
-          )
+        ? await this.ruleBaseCatalogRepository.findAllByRuleTypeKey({
+            ruleTypeKey: input.ruleTypeKey,
+          })
         : await this.ruleBaseCatalogRepository.findAll();
     const data: RuleBaseCatalogItemResponseDto[] = bases.map(
-      (row: RuleBaseCatalog) => {
-        const item: RuleBaseCatalogItemResponseDto =
-          new RuleBaseCatalogItemResponseDto();
-        item.id = row.id;
-        item.name = row.name;
-        item.key = row.key;
-        item.createdAt = row.createdAt.toISOString();
-        item.updatedAt = row.updatedAt.toISOString();
-        return item;
-      },
+      (row: RuleBaseCatalog) =>
+        Object.assign(new RuleBaseCatalogItemResponseDto(), {
+          id: row.id,
+          name: row.name,
+          key: row.key,
+          createdAt: row.createdAt.toISOString(),
+          updatedAt: row.updatedAt.toISOString(),
+        }),
     );
-    const response: ReadAllRuleBasesResponseDto =
-      new ReadAllRuleBasesResponseDto();
-    response.success = true;
-    response.status = 200;
-    response.message = 'OK';
-    response.data = data;
-    return response;
+    return data;
   }
 }

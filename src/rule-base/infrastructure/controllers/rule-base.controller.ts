@@ -12,7 +12,7 @@ import { ReadAllRuleBasesQueryDto } from '@rule-base/application/dtos/read-all-r
 
 import { ReadAllRuleBasesRequestDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-request.dto';
 
-import { ReadAllRuleBasesResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/read-all-rule-bases-response.dto';
+import { RuleBaseCatalogItemResponseDto } from '@rule-base/application/dtos/read-all-rule-bases/rule-base-catalog-item-response.dto';
 
 /** Read-only rule-base catalog; query params validated via {@link ReadAllRuleBasesQueryDto}, use-case input via {@link ReadAllRuleBasesRequestDto}. */
 @ApiTags('rule-base')
@@ -28,10 +28,10 @@ export class RuleBaseController {
     summary:
       'List rule bases (evaluation criteria). Optional ruleTypeKey filters to allowed combinations.',
   })
-  @ApiOkResponse({ type: ReadAllRuleBasesResponseDto })
+  @ApiOkResponse({ type: RuleBaseCatalogItemResponseDto, isArray: true })
   public readAll(
     @Query() query: ReadAllRuleBasesQueryDto,
-  ): Promise<ReadAllRuleBasesResponseDto> {
+  ): Promise<RuleBaseCatalogItemResponseDto[]> {
     return this.readAllRuleBasesUseCase.execute(
       ReadAllRuleBasesRequestDto.fromQuery(query),
     );

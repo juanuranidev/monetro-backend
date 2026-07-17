@@ -19,6 +19,7 @@ import {
 export type TransactionRuleDraftContext = {
   readonly userId: string;
   readonly description: string;
+  /** Owning account id for account-based rule matching (use card's account id when posting on a card). */
   readonly accountId: string;
   readonly transactionTypeId: string;
   readonly categoryIds: readonly string[];
@@ -44,19 +45,19 @@ export class ApplyActiveRulesToTransactionDraftService {
   ): Promise<{ categoryIds: string[]; excludeFromStats: boolean }> {
     let categoryIds: string[] = [...ctx.categoryIds];
     let excludeFromStats: boolean = ctx.excludeFromStats;
-    const rules: readonly Rule[] = await this.ruleRepository.findAllByUserId(
-      ctx.userId,
-    );
+    const rules: readonly Rule[] = await this.ruleRepository.findAllByUserId({
+      userId: ctx.userId,
+    });
     const active: Rule[] = rules
       .filter((r: Rule) => r.isActive)
       .sort((a: Rule, b: Rule) => a.id.localeCompare(b.id));
     for (const rule of active) {
-      const typeRow = await this.ruleTypeCatalogRepository.findById(
-        rule.ruleTypeId,
-      );
-      const baseRow = await this.ruleBaseCatalogRepository.findById(
-        rule.ruleBaseId,
-      );
+      const typeRow = await this.ruleTypeCatalogRepository.findById({
+        id: rule.ruleTypeId,
+      });
+      const baseRow = await this.ruleBaseCatalogRepository.findById({
+        id: rule.ruleBaseId,
+      });
       if (typeRow === undefined || baseRow === undefined) {
         continue;
       }

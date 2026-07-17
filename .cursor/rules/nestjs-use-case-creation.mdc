@@ -34,7 +34,7 @@ Los imports usan alias `@<context>/...` definidos en `tsconfig.json` (p. ej. `@a
 
 - **Interfaz:** `src/<context>/domain/ports/interface-<context>-repository.ts` (o `i-<context>-repository.ts` según el módulo).
   - Un método por operación que el dominio necesite; p. ej. `create(data): Promise<Entity>`.
-  - Para lecturas con reglas de negocio: p. ej. `findOwnedByUser(accountId, userId)`.
+  - **Cada método recibe un solo argumento:** un objeto (`data` o equivalente) tipado en `src/<context>/domain/ports/types/<nombre>-<acción>-data.ts`. No usar parámetros posicionales en el puerto; en el caso de uso se llama p. ej. `findOwnedByUser({ accountId, userId })`, `findByKey({ key })`, `update({ id, name, ... })` según el tipo publicado (los `*UpdateData` no deben anidar la entidad de dominio).
 - **Token:** `src/<context>/domain/<context>-repository.token.ts` exporta `export const X_REPOSITORY = Symbol('X_REPOSITORY');`
 - En el caso de uso: `@Inject(X_REPOSITORY) private readonly repo: IXRepository`.
 
@@ -101,6 +101,8 @@ Para endpoints **públicos** (`auth`), mismo esquema body → `RequestDto.fromBo
 - `@Injectable()`, implementa la interfaz del puerto.
 - `@InjectRepository(XTypeOrmEntity)` + `Repository<XTypeOrmEntity>`.
 - `create`: persistir sin asignar PK en aplicación; `save`; retorno vía `Mapper.fromPostgresToDomain(saved)`.
+
+**`@RelationId` (⚠ repetido en el repo):** las propiedades derivadas (`userId`, `currencyId`, `accountId`, etc.) **no** son columnas registradas para filtros ni para `repository.delete({ ... })`. Usar **`where: { user: { id } }`** (relación `@ManyToOne`), **`QueryBuilder`** con `'user_id = :…'`, y en **`create`/`save`** referencias stub `{ user: { id } as UserTypeOrmEntity }` — no sólo `userId:` en objetos planos.
 
 **Al añadir un nuevo método al puerto:** declararlo en la `interface`, implementarlo en `*TypeOrmRepository`, y usarlo desde el/los caso(s) de uso.
 

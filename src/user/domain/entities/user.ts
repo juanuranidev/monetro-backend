@@ -1,15 +1,12 @@
 /**
- * User aggregate root (domain). Password hash is omitted after persistence mapping when not needed.
+ * User aggregate root (domain). `password` holds the bcrypt hash at rest when loaded from persistence.
  */
 export class User {
   public constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly email: string,
-    public readonly passwordHash: string | undefined,
-    public readonly authId: string | undefined,
+    public readonly password: string | undefined,
     public readonly image: string | undefined,
   ) {}
 }
-
-export type UserCreateData = Omit<InstanceType<typeof User>, 'id'>;

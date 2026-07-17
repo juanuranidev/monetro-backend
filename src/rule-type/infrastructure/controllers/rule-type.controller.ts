@@ -10,7 +10,7 @@ import { ReadAllRuleTypesUseCase } from '@rule-type/application/use-cases/read-a
 
 import { ReadAllRuleTypesRequestDto } from '@rule-type/application/dtos/read-all-rule-types/read-all-rule-types-request.dto';
 
-import { ReadAllRuleTypesResponseDto } from '@rule-type/application/dtos/read-all-rule-types/read-all-rule-types-response.dto';
+import { RuleTypeCatalogItemResponseDto } from '@rule-type/application/dtos/read-all-rule-types/rule-type-catalog-item-response.dto';
 
 /** Read-only rule-type catalog; no query/body ({@link ReadAllRuleTypesRequestDto} reserved for future filters). */
 @ApiTags('rule-type')
@@ -23,8 +23,8 @@ export class RuleTypeController {
 
   @Get('read-all')
   @ApiOperation({ summary: 'List all rule types (intentions)' })
-  @ApiOkResponse({ type: ReadAllRuleTypesResponseDto })
-  public readAll(): Promise<ReadAllRuleTypesResponseDto> {
+  @ApiOkResponse({ type: RuleTypeCatalogItemResponseDto, isArray: true })
+  public readAll(): Promise<RuleTypeCatalogItemResponseDto[]> {
     return this.readAllRuleTypesUseCase.execute(
       new ReadAllRuleTypesRequestDto(),
     );

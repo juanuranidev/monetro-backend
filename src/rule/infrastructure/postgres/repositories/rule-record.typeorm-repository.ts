@@ -3,11 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
 
+import { Rule } from '@rule/domain/entities/rule';
 import { RuleMapper } from '@rule/infrastructure/postgres/mappers/rule.mapper';
+import type { RuleCreateData } from '@rule/domain/ports/types/rule-create-data';
+import type { RuleUpdateData } from '@rule/domain/ports/types/rule-update-data';
 import type { IRuleRepository } from '@rule/domain/ports/i-rule-repository';
 import { RuleRecordTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-record.typeorm-entity';
-import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
+import type { RuleDeleteOwnedData } from '@rule/domain/ports/types/rule-delete-owned-data';
+import type { RuleFindAllByUserIdData } from '@rule/domain/ports/types/rule-find-all-by-user-id-data';
+import type { RuleFindOwnedByUserData } from '@rule/domain/ports/types/rule-find-owned-by-user-data';
 import { RuleCategorizationTargetTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-categorization-target.typeorm-entity';
+
 @Injectable()
 export class RuleRecordTypeOrmRepository implements IRuleRepository {
   public constructor(
@@ -28,9 +34,11 @@ export class RuleRecordTypeOrmRepository implements IRuleRepository {
     return RuleMapper.fromPostgresToDomain(saved, effectIds);
   }
 
-  public async findAllByUserId(userId: string): Promise<readonly Rule[]> {
+  public async findAllByUserId(
+    data: RuleFindAllByUserIdData,
+  ): Promise<readonly Rule[]> {
     const rows: RuleRecordTypeOrmEntity[] = await this.repository.find({
-      where: { userId },
+      where: { user: { id: data.userId } },
       order: { createdAt: 'DESC' },
     });
     if (rows.length === 0) {
@@ -44,11 +52,10 @@ export class RuleRecordTypeOrmRepository implements IRuleRepository {
   }
 
   public async findOwnedByUser(
-    ruleId: string,
-    userId: string,
+    data: RuleFindOwnedByUserData,
   ): Promise<Rule | undefined> {
     const row: RuleRecordTypeOrmEntity | null = await this.repository.findOne({
-      where: { id: ruleId, userId },
+      where: { id: data.ruleId, user: { id: data.userId } },
     });
     if (row === null) {
       return undefined;
@@ -57,23 +64,29 @@ export class RuleRecordTypeOrmRepository implements IRuleRepository {
     return RuleMapper.fromPostgresToDomain(row, effectIds);
   }
 
-  public async update(domain: Rule): Promise<Rule> {
+  public async update(data: RuleUpdateData): Promise<Rule> {
     const effectIds: string[] = this.normalizeEffectCategoryIds(
-      domain.effectCategoryIds,
+      data.effectCategoryIds,
     );
     const entity: RuleRecordTypeOrmEntity = await this.repository.findOneOrFail(
       {
-        where: { id: domain.id, userId: domain.userId },
+        where: { id: data.id, user: { id: data.userId } },
       },
     );
-    RuleMapper.assignDomainToEntity(entity, domain);
+    RuleMapper.assignDomainToEntity(entity, data);
     const saved: RuleRecordTypeOrmEntity = await this.repository.save(entity);
     await this.replaceEffectCategories(saved.id, effectIds);
     return RuleMapper.fromPostgresToDomain(saved, effectIds);
   }
 
-  public async deleteOwned(ruleId: string, userId: string): Promise<void> {
-    await this.repository.delete({ id: ruleId, userId });
+  public async deleteOwned(data: RuleDeleteOwnedData): Promise<void> {
+    await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(RuleRecordTypeOrmEntity)
+      .where('id = :ruleId', { ruleId: data.ruleId })
+      .andWhere('user_id = :userId', { userId: data.userId })
+      .execute();
   }
 
   private normalizeEffectCategoryIds(

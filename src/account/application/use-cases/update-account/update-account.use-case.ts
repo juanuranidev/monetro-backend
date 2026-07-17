@@ -39,25 +39,29 @@ export class UpdateAccountUseCase {
     if (!this.hasPatchFields(patch)) {
       throw new BadRequestException('No fields to update');
     }
+
     const existing: Account | undefined =
-      await this.accountRepository.findOwnedByUser(
-        input.accountId,
-        input.userId,
-      );
+      await this.accountRepository.findOwnedByUser({
+        accountId: input.accountId,
+        userId: input.userId,
+      });
     if (existing === undefined) {
       throw new NotFoundException('Account not found');
     }
+
     let currencyId: string = existing.currencyId;
     if (patch.currencyKey !== undefined) {
-      const currency = await this.currencyRepository.findByKey(
-        patch.currencyKey,
-      );
+      const currency = await this.currencyRepository.findByKey({
+        key: patch.currencyKey,
+      });
       if (currency === undefined) {
         throw new BadRequestException('Unknown currency key');
       }
       if (currency.id !== existing.currencyId) {
         const txnCount: number =
-          await this.transactionRepository.countByAccountId(existing.id);
+          await this.transactionRepository.countByAccountId({
+            accountId: existing.id,
+          });
         if (txnCount > 0) {
           throw new BadRequestException(
             'Cannot change account currency while transactions exist for this account',
@@ -90,17 +94,24 @@ export class UpdateAccountUseCase {
       currencyId,
       existing.userId,
     );
-    const saved: Account = await this.accountRepository.update(updated);
-    const response: CreateAccountResponseDto = new CreateAccountResponseDto();
-    response.id = saved.id;
-    response.name = saved.name;
-    response.identifier = saved.identifier;
-    response.excludeFromStats = saved.excludeFromStats;
-    response.currencyId = saved.currencyId;
-    if (saved.icon !== undefined) {
-      response.icon = saved.icon;
-    }
-    return response;
+    const saved: Account = await this.accountRepository.update({
+      id: updated.id,
+      name: updated.name,
+      identifier: updated.identifier,
+      icon: updated.icon,
+      excludeFromStats: updated.excludeFromStats,
+      currencyId: updated.currencyId,
+      userId: updated.userId,
+    });
+
+    return Object.assign(new CreateAccountResponseDto(), {
+      id: saved.id,
+      name: saved.name,
+      identifier: saved.identifier,
+      excludeFromStats: saved.excludeFromStats,
+      currencyId: saved.currencyId,
+      ...(saved.icon !== undefined ? { icon: saved.icon } : {}),
+    });
   }
 
   private hasPatchFields(patch: UpdateAccountBodyDto): boolean {

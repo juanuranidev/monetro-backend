@@ -15,6 +15,14 @@ export class TransactionMapper {
       entity.recordDate instanceof Date
         ? entity.recordDate
         : new Date(entity.recordDate);
+    const accountLeg: string | undefined =
+      entity.accountId === null || entity.accountId === undefined
+        ? undefined
+        : entity.accountId;
+    const creditCardLeg: string | undefined =
+      entity.creditCardId === null || entity.creditCardId === undefined
+        ? undefined
+        : entity.creditCardId;
     return new Transaction(
       entity.id,
       MoneyAmount.fromString(entity.amount),
@@ -24,7 +32,8 @@ export class TransactionMapper {
       categoryIds,
       entity.transactionTypeId,
       entity.currencyId,
-      entity.accountId,
+      accountLeg,
+      creditCardLeg,
     );
   }
 }

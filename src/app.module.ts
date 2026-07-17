@@ -7,6 +7,8 @@ import { RuleBaseModule } from '@rule-base/rule-base.module';
 
 import { RuleTypeModule } from '@rule-type/rule-type.module';
 
+import { CreditCardModule } from '@credit-card/credit-card.module';
+
 import { AccountModule } from '@account/account.module';
 
 import { AuthModule } from '@auth/auth.module';
@@ -60,6 +62,7 @@ import { UserModule } from '@user/user.module';
     UserModule,
     AccountModule,
     CategoryModule,
+    CreditCardModule,
     CurrencyModule,
     TransactionModule,
   ],

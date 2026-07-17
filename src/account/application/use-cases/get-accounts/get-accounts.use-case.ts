@@ -19,20 +19,19 @@ export class GetAccountsUseCase {
   public async execute(
     input: GetAccountsRequestDto,
   ): Promise<GetAccountsResponseDto[]> {
-    const accounts: Account[] = await this.accountRepository.findAllByUserId(
-      input.userId,
-    );
-    return accounts.map((account: Account) => {
-      const row: GetAccountsResponseDto = new GetAccountsResponseDto();
-      row.id = account.id;
-      row.name = account.name;
-      row.identifier = account.identifier;
-      row.excludeFromStats = account.excludeFromStats;
-      row.currencyId = account.currencyId;
-      if (account.icon !== undefined) {
-        row.icon = account.icon;
-      }
-      return row;
+    const accounts: Account[] = await this.accountRepository.findAllByUserId({
+      userId: input.userId,
     });
+
+    return accounts.map((account: Account) =>
+      Object.assign(new GetAccountsResponseDto(), {
+        id: account.id,
+        name: account.name,
+        identifier: account.identifier,
+        excludeFromStats: account.excludeFromStats,
+        currencyId: account.currencyId,
+        ...(account.icon !== undefined ? { icon: account.icon } : {}),
+      }),
+    );
   }
 }

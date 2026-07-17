@@ -15,20 +15,17 @@ export class GetUserProfileUseCase {
   public async execute(
     input: GetUserProfileRequestDto,
   ): Promise<GetUserProfileResponseDto> {
-    const user = await this.userRepository.findById(input.userId);
+    const user = await this.userRepository.findById({ id: input.userId });
+
     if (user === undefined) {
       throw new NotFoundException('User not found');
     }
-    const response: GetUserProfileResponseDto = new GetUserProfileResponseDto();
-    response.id = user.id;
-    response.name = user.name;
-    response.email = user.email;
-    if (user.authId !== undefined) {
-      response.authId = user.authId;
-    }
-    if (user.image !== undefined) {
-      response.image = user.image;
-    }
-    return response;
+
+    return Object.assign(new GetUserProfileResponseDto(), {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      ...(user.image !== undefined ? { image: user.image } : {}),
+    });
   }
 }

@@ -1,9 +1,11 @@
-import { IsUUID } from 'class-validator';
-
 /**
- * Input for {@link GetTransactionsUseCase} (caller supplies the authenticated user id).
+ * Input for {@link GetTransactionsUseCase}. Built in the controller from
+ * {@link GetTransactionsQueryDto} (validated) and {@link RequestUser.userId}.
  */
 export class GetTransactionsRequestDto {
-  @IsUUID()
   public userId!: string;
+
+  public accountId?: string;
+
+  public creditCardId?: string;
 }

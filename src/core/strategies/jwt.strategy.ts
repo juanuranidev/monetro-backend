@@ -19,13 +19,14 @@ export type RequestUser = {
   readonly userId: string;
   readonly email: string;
   readonly name: string;
-  readonly authId: string | undefined;
   readonly image: string | undefined;
 };
 
 const bearerExtractor = ExtractJwt.fromAuthHeaderAsBearerToken();
 
-function jwtFromRequestWithTrim(req: Parameters<typeof bearerExtractor>[0]): string | null {
+function jwtFromRequestWithTrim(
+  req: Parameters<typeof bearerExtractor>[0],
+): string | null {
   const raw: string | null = bearerExtractor(req);
   if (raw === null) {
     return null;
@@ -49,7 +50,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   public async validate(payload: JwtPayload): Promise<RequestUser> {
-    const user = await this.userRepository.findById(payload.sub);
+    const user = await this.userRepository.findById({ id: payload.sub });
     if (user === undefined) {
       throw new UnauthorizedException('User not found');
     }
@@ -57,7 +58,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       userId: user.id,
       email: user.email,
       name: user.name,
-      authId: user.authId,
       image: user.image,
     };
   }

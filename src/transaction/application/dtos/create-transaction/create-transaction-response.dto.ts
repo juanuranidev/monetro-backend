@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateTransactionResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -19,7 +19,11 @@ export class CreateTransactionResponseDto {
   @ApiProperty()
   public excludeFromStats!: boolean;
 
-  @ApiProperty({ type: [String], format: 'uuid' })
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'May be empty when the transaction has no categories.',
+  })
   public categoryIds!: string[];
 
   @ApiProperty({ format: 'uuid' })
@@ -28,6 +32,11 @@ export class CreateTransactionResponseDto {
   @ApiProperty({ format: 'uuid' })
   public currencyId!: string;
 
-  @ApiProperty({ format: 'uuid' })
-  public accountId!: string;
+  /** Present when posting leg was a direct account. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  public accountId?: string;
+
+  /** Present when posting leg was a credit card. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  public creditCardId?: string;
 }

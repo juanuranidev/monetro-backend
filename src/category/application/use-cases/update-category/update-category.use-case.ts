@@ -31,10 +31,10 @@ export class UpdateCategoryUseCase {
       throw new BadRequestException('No fields to update');
     }
     const existing: Category | undefined =
-      await this.categoryRepository.findAccessibleByUser(
-        input.categoryId,
-        input.userId,
-      );
+      await this.categoryRepository.findAccessibleByUser({
+        categoryId: input.categoryId,
+        userId: input.userId,
+      });
     if (existing === undefined) {
       throw new NotFoundException('Category not found');
     }
@@ -56,7 +56,13 @@ export class UpdateCategoryUseCase {
       existing.userId,
       existing.isActive,
     );
-    const saved: Category = await this.categoryRepository.update(updated);
+    const saved: Category = await this.categoryRepository.update({
+      id: updated.id,
+      name: updated.name,
+      icon: updated.icon,
+      userId: updated.userId,
+      isActive: updated.isActive,
+    });
     return Object.assign(new UpdateCategoryResponseDto(), {
       id: saved.id,
       name: saved.name,

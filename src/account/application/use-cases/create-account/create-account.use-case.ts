@@ -1,7 +1,7 @@
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
-import { type AccountCreateData } from '@account/domain/entities/account';
+import { type AccountCreateData } from '@account/domain/ports/types/account-create-data';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 import { CreateAccountResponseDto } from '@account/application/dtos/create-account/create-account-response.dto';
 import type { CreateAccountRequestDto } from '@account/application/dtos/create-account/create-account-request.dto';
@@ -21,10 +21,13 @@ export class CreateAccountUseCase {
   public async execute(
     input: CreateAccountRequestDto,
   ): Promise<CreateAccountResponseDto> {
-    const currency = await this.currencyRepository.findByKey(input.currencyKey);
+    const currency = await this.currencyRepository.findByKey({
+      key: input.currencyKey,
+    });
     if (currency === undefined) {
       throw new BadRequestException('Unknown currency key');
     }
+
     const excludeFromStats: boolean = input.excludeFromStats ?? false;
     const data: AccountCreateData = {
       name: input.name.trim(),
@@ -34,16 +37,16 @@ export class CreateAccountUseCase {
       currencyId: currency.id,
       userId: input.userId,
     };
+
     const saved = await this.accountRepository.create(data);
-    const response: CreateAccountResponseDto = new CreateAccountResponseDto();
-    response.id = saved.id;
-    response.name = saved.name;
-    response.identifier = saved.identifier;
-    response.excludeFromStats = saved.excludeFromStats;
-    response.currencyId = saved.currencyId;
-    if (saved.icon !== undefined) {
-      response.icon = saved.icon;
-    }
-    return response;
+
+    return Object.assign(new CreateAccountResponseDto(), {
+      id: saved.id,
+      name: saved.name,
+      identifier: saved.identifier,
+      excludeFromStats: saved.excludeFromStats,
+      currencyId: saved.currencyId,
+      ...(saved.icon !== undefined ? { icon: saved.icon } : {}),
+    });
   }
 }

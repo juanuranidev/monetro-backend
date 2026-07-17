@@ -29,22 +29,25 @@ export class GetRulesUseCase {
   public async execute(
     input: GetRulesRequestDto,
   ): Promise<RuleResourceResponseDto[]> {
-    const rules: readonly Rule[] = await this.ruleRepository.findAllByUserId(
-      input.userId,
-    );
+    const rules: readonly Rule[] = await this.ruleRepository.findAllByUserId({
+      userId: input.userId,
+    });
     const out: RuleResourceResponseDto[] = [];
     for (const rule of rules) {
-      const type = await this.ruleTypeCatalogRepository.findById(
-        rule.ruleTypeId,
-      );
-      const base = await this.ruleBaseCatalogRepository.findById(
-        rule.ruleBaseId,
-      );
+      const type = await this.ruleTypeCatalogRepository.findById({
+        id: rule.ruleTypeId,
+      });
+      const base = await this.ruleBaseCatalogRepository.findById({
+        id: rule.ruleBaseId,
+      });
       out.push(
-        RuleToResourceMapper.toResource(
-          rule,
-          type?.key ?? 'unknown',
-          base?.key ?? 'unknown',
+        Object.assign(
+          new RuleResourceResponseDto(),
+          RuleToResourceMapper.responseProps(
+            rule,
+            type?.key ?? 'unknown',
+            base?.key ?? 'unknown',
+          ),
         ),
       );
     }

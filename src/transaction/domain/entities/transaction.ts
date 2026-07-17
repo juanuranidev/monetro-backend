@@ -10,11 +10,7 @@ export class Transaction {
     public readonly categoryIds: readonly string[],
     public readonly transactionTypeId: string,
     public readonly currencyId: string,
-    public readonly accountId: string,
+    public readonly accountId: string | undefined,
+    public readonly creditCardId: string | undefined,
   ) {}
 }
-
-export type TransactionCreateData = Omit<
-  InstanceType<typeof Transaction>,
-  'id'
->;

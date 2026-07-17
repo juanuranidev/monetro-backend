@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CATEGORY_REPOSITORY } from '@category/domain/category-repository.token';
-import { type CategoryCreateData } from '@category/domain/entities/category';
+import { type CategoryCreateData } from '@category/domain/ports/types/category-create-data';
 import type { ICategoryRepository } from '@category/domain/ports/i-category-repository';
 import { CreateCategoryResponseDto } from '@category/application/dtos/create-category/create-category-response.dto';
 import type { CreateCategoryRequestDto } from '@category/application/dtos/create-category/create-category-request.dto';

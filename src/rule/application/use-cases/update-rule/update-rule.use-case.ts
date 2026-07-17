@@ -57,16 +57,19 @@ export class UpdateRuleUseCase {
     params: UpdateRuleRequestDto,
   ): Promise<RuleResourceResponseDto> {
     const existing: Rule | undefined =
-      await this.ruleRepository.findOwnedByUser(params.ruleId, params.userId);
+      await this.ruleRepository.findOwnedByUser({
+        ruleId: params.ruleId,
+        userId: params.userId,
+      });
     if (existing === undefined) {
       throw new NotFoundException('Rule not found');
     }
-    const ruleType = await this.ruleTypeCatalogRepository.findById(
-      existing.ruleTypeId,
-    );
-    const ruleBase = await this.ruleBaseCatalogRepository.findById(
-      existing.ruleBaseId,
-    );
+    const ruleType = await this.ruleTypeCatalogRepository.findById({
+      id: existing.ruleTypeId,
+    });
+    const ruleBase = await this.ruleBaseCatalogRepository.findById({
+      id: existing.ruleBaseId,
+    });
     if (ruleType === undefined || ruleBase === undefined) {
       throw new BadRequestException('Rule metadata is inconsistent');
     }
@@ -107,10 +110,10 @@ export class UpdateRuleUseCase {
         existing,
       );
     const isPairAllowed: boolean =
-      await this.ruleBaseCatalogRepository.isPairAllowed(
-        ruleType.key,
-        ruleBase.key,
-      );
+      await this.ruleBaseCatalogRepository.isPairAllowed({
+        ruleTypeKey: ruleType.key,
+        ruleBaseKey: ruleBase.key,
+      });
     assertRuleTypeBaseShape({
       ruleTypeKey: ruleType.key,
       ruleBaseKey: ruleBase.key,
@@ -142,8 +145,24 @@ export class UpdateRuleUseCase {
       excludesFromStats,
       existing.userId,
     );
-    const saved: Rule = await this.ruleRepository.update(updated);
-    return RuleToResourceMapper.toResource(saved, ruleType.key, ruleBase.key);
+    const saved: Rule = await this.ruleRepository.update({
+      id: updated.id,
+      name: updated.name,
+      isActive: updated.isActive,
+      ruleTypeId: updated.ruleTypeId,
+      ruleBaseId: updated.ruleBaseId,
+      pattern: updated.pattern,
+      sourceAccountId: updated.sourceAccountId,
+      sourceCategoryId: updated.sourceCategoryId,
+      sourceTransactionTypeId: updated.sourceTransactionTypeId,
+      effectCategoryIds: updated.effectCategoryIds,
+      excludesFromStats: updated.excludesFromStats,
+      userId: updated.userId,
+    });
+    return Object.assign(
+      new RuleResourceResponseDto(),
+      RuleToResourceMapper.responseProps(saved, ruleType.key, ruleBase.key),
+    );
   }
 
   private async resolveSourceTransactionTypeId(
@@ -162,8 +181,9 @@ export class UpdateRuleUseCase {
     if (transactionTypeKey === undefined) {
       return existing.sourceTransactionTypeId;
     }
-    const resolved =
-      await this.transactionTypeRepository.findByKey(transactionTypeKey);
+    const resolved = await this.transactionTypeRepository.findByKey({
+      key: transactionTypeKey,
+    });
     if (resolved === undefined) {
       throw new BadRequestException('Unknown transaction type');
     }
@@ -177,28 +197,28 @@ export class UpdateRuleUseCase {
     readonly sourceCategoryId: string | undefined;
   }): Promise<void> {
     for (const categoryId of params.effectCategoryIds) {
-      const c = await this.categoryRepository.findAccessibleByUser(
+      const c = await this.categoryRepository.findAccessibleByUser({
         categoryId,
-        params.userId,
-      );
+        userId: params.userId,
+      });
       if (c === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
     if (params.sourceCategoryId !== undefined) {
-      const c = await this.categoryRepository.findAccessibleByUser(
-        params.sourceCategoryId,
-        params.userId,
-      );
+      const c = await this.categoryRepository.findAccessibleByUser({
+        categoryId: params.sourceCategoryId,
+        userId: params.userId,
+      });
       if (c === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
     if (params.sourceAccountId !== undefined) {
-      const a = await this.accountRepository.findOwnedByUser(
-        params.sourceAccountId,
-        params.userId,
-      );
+      const a = await this.accountRepository.findOwnedByUser({
+        accountId: params.sourceAccountId,
+        userId: params.userId,
+      });
       if (a === undefined) {
         throw new BadRequestException('Account not found for current user');
       }

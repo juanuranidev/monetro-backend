@@ -1,8 +1,11 @@
-import type { User, UserCreateData } from '@user/domain/entities/user';
+import type { User } from '@user/domain/entities/user';
+import type { UserCreateData } from '@user/domain/ports/types/user-create-data';
+import type { UserFindByIdData } from '@user/domain/ports/types/user-find-by-id-data';
+import type { UserFindByEmailData } from '@user/domain/ports/types/user-find-by-email-data';
 
 export interface IUserRepository {
-  findById(id: string): Promise<User | undefined>;
-  findByEmail(email: string): Promise<User | undefined>;
+  findById(data: UserFindByIdData): Promise<User | undefined>;
+  findByEmail(data: UserFindByEmailData): Promise<User | undefined>;
   create(data: UserCreateData): Promise<User>;
-  existsByEmail(email: string): Promise<boolean>;
+  existsByEmail(data: UserFindByEmailData): Promise<boolean>;
 }

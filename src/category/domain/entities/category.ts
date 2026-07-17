@@ -7,8 +7,3 @@ export class Category {
     public readonly isActive: boolean,
   ) {}
 }
-
-export type CategoryCreateData = Omit<
-  InstanceType<typeof Category>,
-  'id' | 'isActive'
->;

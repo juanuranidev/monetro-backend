@@ -6,8 +6,9 @@ import { AccountTypeOrmEntity } from '@account/infrastructure/postgres/entities/
 
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
 
+import { Rule } from '@rule/domain/entities/rule';
+import type { RuleCreateData } from '@rule/domain/ports/types/rule-create-data';
 import { RuleRecordTypeOrmEntity } from '@rule/infrastructure/postgres/entities/rule-record.typeorm-entity';
-import { Rule, type RuleCreateData } from '@rule/domain/entities/rule';
 
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 
@@ -38,7 +39,7 @@ export class RuleMapper {
 
   public static assignDomainToEntity(
     entity: RuleRecordTypeOrmEntity,
-    data: Rule | RuleCreateData,
+    data: RuleCreateData,
   ): void {
     entity.name = data.name;
     entity.isActive = data.isActive;

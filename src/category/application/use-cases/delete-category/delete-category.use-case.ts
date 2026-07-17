@@ -25,19 +25,19 @@ export class DeleteCategoryUseCase {
     input: DeleteCategoryRequestDto,
   ): Promise<DeleteCategoryResponseDto> {
     const existing: Category | undefined =
-      await this.categoryRepository.findAccessibleByUser(
-        input.categoryId,
-        input.userId,
-      );
+      await this.categoryRepository.findAccessibleByUser({
+        categoryId: input.categoryId,
+        userId: input.userId,
+      });
     if (existing === undefined) {
       throw new NotFoundException('Category not found');
     }
     this.assertCategoryOwnedByUser(existing, input.userId);
-    await this.categoryRepository.softDeleteByIdForUser(
-      input.categoryId,
-      input.userId,
-    );
-    return new DeleteCategoryResponseDto();
+    await this.categoryRepository.softDeleteByIdForUser({
+      categoryId: input.categoryId,
+      userId: input.userId,
+    });
+    return Object.assign(new DeleteCategoryResponseDto(), {});
   }
 
   private assertCategoryOwnedByUser(category: Category, userId: string): void {

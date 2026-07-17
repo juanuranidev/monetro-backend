@@ -4,6 +4,7 @@ import {
   Post,
   Param,
   Patch,
+  Query,
   HttpCode,
   Controller,
   HttpStatus,
@@ -13,6 +14,7 @@ import {
   ApiBody,
   ApiTags,
   ApiParam,
+  ApiQuery,
   ApiOperation,
   ApiBearerAuth,
   ApiOkResponse,
@@ -22,6 +24,7 @@ import {
 import type { RequestUser } from '@core/strategies/jwt.strategy';
 
 import { GetTransactionsUseCase } from '@transaction/application/use-cases/get-transactions/get-transactions.use-case';
+import { GetTransactionsQueryDto } from '@transaction/application/dtos/get-transactions/get-transactions-query.dto';
 import { CreateTransactionUseCase } from '@transaction/application/use-cases/create-transaction/create-transaction.use-case';
 import { UpdateTransactionUseCase } from '@transaction/application/use-cases/update-transaction/update-transaction.use-case';
 import { UpdateTransactionBodyDto } from '@transaction/application/dtos/update-transaction/update-transaction-body.dto';
@@ -44,13 +47,37 @@ export class TransactionController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List transactions for the current user' })
+  @ApiOperation({
+    summary: 'List transactions for the current user',
+    description:
+      'Optional `accountId` filters to postings that hit that account (direct leg or any card tied to it). Optional `creditCardId` restricts to postings on one card — do not combine both.',
+  })
+  @ApiQuery({
+    name: 'accountId',
+    required: false,
+    description: 'Optional. Filter by account id (must be owned by the user).',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'creditCardId',
+    required: false,
+    description:
+      'Optional. Filter by credit-card posting leg (card must belong to the user).',
+    format: 'uuid',
+  })
   @ApiOkResponse({ type: CreateTransactionResponseDto, isArray: true })
   public getTransactions(
     @CurrentUser() user: RequestUser,
+    @Query() query: GetTransactionsQueryDto,
   ): Promise<CreateTransactionResponseDto[]> {
     return this.getTransactionsUseCase.execute(
-      Object.assign(new GetTransactionsRequestDto(), { userId: user.userId }),
+      Object.assign(new GetTransactionsRequestDto(), {
+        userId: user.userId,
+        ...(query.accountId !== undefined ? { accountId: query.accountId } : {}),
+        ...(query.creditCardId !== undefined
+          ? { creditCardId: query.creditCardId }
+          : {}),
+      }),
     );
   }
 

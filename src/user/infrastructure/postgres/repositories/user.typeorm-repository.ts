@@ -3,10 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
+import type { User } from '@user/domain/entities/user';
 import { UserMapper } from '@user/infrastructure/postgres/mappers/user.mapper';
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
+import type { UserCreateData } from '@user/domain/ports/types/user-create-data';
 import type { IUserRepository } from '@user/domain/ports/i-user-repository';
-import { type User, type UserCreateData } from '@user/domain/entities/user';
+import type { UserFindByIdData } from '@user/domain/ports/types/user-find-by-id-data';
+import type { UserFindByEmailData } from '@user/domain/ports/types/user-find-by-email-data';
 
 @Injectable()
 export class UserTypeOrmRepository implements IUserRepository {
@@ -15,23 +18,25 @@ export class UserTypeOrmRepository implements IUserRepository {
     private readonly repository: Repository<UserTypeOrmEntity>,
   ) {}
 
-  public async findById(id: string): Promise<User | undefined> {
+  public async findById(data: UserFindByIdData): Promise<User | undefined> {
     const row: UserTypeOrmEntity | null = await this.repository.findOne({
-      where: { id },
+      where: { id: data.id },
     });
     return row === null ? undefined : UserMapper.fromPostgresToDomain(row);
   }
 
-  public async findByEmail(email: string): Promise<User | undefined> {
+  public async findByEmail(
+    data: UserFindByEmailData,
+  ): Promise<User | undefined> {
     const row: UserTypeOrmEntity | null = await this.repository.findOne({
-      where: { email: email.toLowerCase() },
+      where: { email: data.email.toLowerCase() },
     });
     return row === null ? undefined : UserMapper.fromPostgresToDomain(row);
   }
 
-  public async existsByEmail(email: string): Promise<boolean> {
+  public async existsByEmail(data: UserFindByEmailData): Promise<boolean> {
     const count: number = await this.repository.count({
-      where: { email: email.toLowerCase() },
+      where: { email: data.email.toLowerCase() },
     });
     return count > 0;
   }

@@ -9,6 +9,10 @@ import { RuleTypeCatalogTypeOrmEntity } from '@rule-type/infrastructure/postgres
 
 import { RuleTypeBasePivotTypeOrmEntity } from '@rule-base/infrastructure/postgres/entities/rule-type-base-pivot.typeorm-entity';
 
+import { CreditCardTierCatalogTypeOrmEntity } from '@credit-card/infrastructure/postgres/entities/credit-card-tier-catalog.typeorm-entity';
+
+import { CreditCardBrandCatalogTypeOrmEntity } from '@credit-card/infrastructure/postgres/entities/credit-card-brand-catalog.typeorm-entity';
+
 import { CurrencyTypeOrmEntity } from '@currency/infrastructure/postgres/entities/currency.typeorm-entity';
 
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
@@ -29,6 +33,25 @@ const DEFAULT_TXN_TYPES: readonly {
 }[] = [
   { key: 'income', displayNameEs: 'Ingreso' },
   { key: 'expense', displayNameEs: 'Gasto' },
+] as const;
+
+const DEFAULT_CREDIT_CARD_BRANDS: readonly {
+  readonly key: string;
+  readonly displayNameEs: string;
+}[] = [
+  { key: 'visa', displayNameEs: 'Visa' },
+  { key: 'mastercard', displayNameEs: 'Mastercard' },
+  { key: 'amex', displayNameEs: 'American Express' },
+] as const;
+
+const DEFAULT_CREDIT_CARD_TIERS: readonly {
+  readonly key: string;
+  readonly displayNameEs: string;
+}[] = [
+  { key: 'black', displayNameEs: 'Black' },
+  { key: 'gold', displayNameEs: 'Gold' },
+  { key: 'platinum', displayNameEs: 'Platinum' },
+  { key: 'classic', displayNameEs: 'Classic' },
 ] as const;
 
 const RULE_TYPE_SEEDS: readonly {
@@ -78,12 +101,14 @@ export class DatabaseSeedService {
   ) {}
 
   /**
-   * Inserts default currencies, transaction types, and rule catalogs when tables are empty.
+   * Inserts default catalogs (currencies, transaction types, credit card catalogs, rules) when empty.
    * Safe to call repeatedly (no-op if data already exists).
    */
   public async runCatalogSeeds(): Promise<void> {
     await this.seedCurrencies();
     await this.seedTransactionTypes();
+    await this.seedCreditCardBrands();
+    await this.seedCreditCardTiers();
     await this.seedRuleCatalogs();
   }
 
@@ -120,6 +145,44 @@ export class DatabaseSeedService {
     );
     await repository.save(rows);
     this.logger.log(`Seeded ${rows.length} transaction types`);
+  }
+
+  private async seedCreditCardBrands(): Promise<void> {
+    const repository = this.dataSource.getRepository(
+      CreditCardBrandCatalogTypeOrmEntity,
+    );
+    const existing: number = await repository.count();
+    if (existing > 0) {
+      return;
+    }
+    const rows: CreditCardBrandCatalogTypeOrmEntity[] =
+      DEFAULT_CREDIT_CARD_BRANDS.map((row) =>
+        repository.create({
+          key: row.key,
+          displayNameEs: row.displayNameEs,
+        }),
+      );
+    await repository.save(rows);
+    this.logger.log(`Seeded ${rows.length} credit card brands`);
+  }
+
+  private async seedCreditCardTiers(): Promise<void> {
+    const repository = this.dataSource.getRepository(
+      CreditCardTierCatalogTypeOrmEntity,
+    );
+    const existing: number = await repository.count();
+    if (existing > 0) {
+      return;
+    }
+    const rows: CreditCardTierCatalogTypeOrmEntity[] =
+      DEFAULT_CREDIT_CARD_TIERS.map((row) =>
+        repository.create({
+          key: row.key,
+          displayNameEs: row.displayNameEs,
+        }),
+      );
+    await repository.save(rows);
+    this.logger.log(`Seeded ${rows.length} credit card tiers`);
   }
 
   private async seedRuleCatalogs(): Promise<void> {

@@ -61,3 +61,6 @@ postman/*
 # Cursor
 .cursor/*
 .agents/*
+
+# Local-only notes (Postman / manual QA; not committed)
+*.local.md

@@ -1,6 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 
+import { CREDIT_CARD_REPOSITORY } from '@credit-card/domain/credit-card-repository.token';
+
+import type { ICreditCardRepository } from '@credit-card/domain/ports/i-credit-card-repository';
+
 import { ACCOUNT_REPOSITORY } from '@account/domain/account-repository.token';
 import type { IAccountRepository } from '@account/domain/ports/interface-account-repository';
 
@@ -15,12 +19,13 @@ import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
 import { parseRecordInstantToUtc } from '@shared/domain/services/parse-record-instant-to-utc';
 
 import { TRANSACTION_REPOSITORY } from '@transaction/domain/transaction-repository.token';
-import { type TransactionCreateData } from '@transaction/domain/entities/transaction';
+import { type TransactionCreateData } from '@transaction/domain/ports/types/transaction-create-data';
 import { TRANSACTION_TYPE_REPOSITORY } from '@transaction/domain/transaction-type-repository.token';
 import type { ITransactionRepository } from '@transaction/domain/ports/i-transaction-repository';
-import { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
 import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
 import type { CreateTransactionRequestDto } from '@transaction/application/dtos/create-transaction/create-transaction-request.dto';
+import { mapTransactionToCreateResponseDto } from '@transaction/application/mappers/transaction-to-create-response.mapper';
+import type { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
 import { ApplyActiveRulesToTransactionDraftService } from '@transaction/application/services/apply-active-rules-to-transaction-draft.service';
 
 @Injectable()
@@ -36,6 +41,8 @@ export class CreateTransactionUseCase {
     private readonly categoryRepository: ICategoryRepository,
     @Inject(ACCOUNT_REPOSITORY)
     private readonly accountRepository: IAccountRepository,
+    @Inject(CREDIT_CARD_REPOSITORY)
+    private readonly creditCardRepository: ICreditCardRepository,
     private readonly configService: ConfigService,
     private readonly applyRulesToDraftService: ApplyActiveRulesToTransactionDraftService,
   ) {}
@@ -44,38 +51,76 @@ export class CreateTransactionUseCase {
     input: CreateTransactionRequestDto,
   ): Promise<CreateTransactionResponseDto> {
     const userId: string = input.userId;
-    const uniqueCategoryIds: string[] = [...new Set(input.categoryIds)];
-    const account = await this.accountRepository.findOwnedByUser(
-      input.accountId,
-      userId,
-    );
-    if (account === undefined) {
-      throw new BadRequestException('Account not found for current user');
+    const hasAccountLeg: boolean = input.accountId !== undefined && input.accountId.length > 0;
+    const hasCardLeg: boolean =
+      input.creditCardId !== undefined && input.creditCardId.length > 0;
+    if (hasAccountLeg === hasCardLeg) {
+      throw new BadRequestException(
+        'Exactly one of accountId or creditCardId must be provided',
+      );
     }
-    if (account.userId !== userId) {
-      throw new BadRequestException('Account ownership mismatch');
+    const uniqueCategoryIds: string[] = [...new Set(input.categoryIds)];
+    let effectiveAccountIdForRules: string | undefined;
+    let persistenceAccountId: string | undefined;
+    let persistenceCreditCardId: string | undefined;
+    if (hasAccountLeg && input.accountId !== undefined) {
+      const account = await this.accountRepository.findOwnedByUser({
+        accountId: input.accountId,
+        userId,
+      });
+      if (account === undefined) {
+        throw new BadRequestException('Account not found for current user');
+      }
+      persistenceAccountId = account.id;
+      persistenceCreditCardId = undefined;
+    } else if (hasCardLeg && input.creditCardId !== undefined) {
+      const card = await this.creditCardRepository.findOwnedByUser({
+        creditCardId: input.creditCardId,
+        userId,
+      });
+      if (card === undefined) {
+        throw new BadRequestException('Credit card not found for current user');
+      }
+      persistenceCreditCardId = card.id;
+      persistenceAccountId = undefined;
+      effectiveAccountIdForRules = card.accountId;
+    }
+    if (effectiveAccountIdForRules === undefined) {
+      throw new BadRequestException('Could not resolve account for posting');
+    }
+    const effectiveAccount =
+      await this.accountRepository.findOwnedByUser({
+        accountId: effectiveAccountIdForRules,
+        userId,
+      });
+    if (effectiveAccount === undefined) {
+      throw new BadRequestException(
+        'Posting account resolved from credit card is not accessible',
+      );
     }
     for (const categoryId of uniqueCategoryIds) {
-      const category = await this.categoryRepository.findAccessibleByUser(
+      const category = await this.categoryRepository.findAccessibleByUser({
         categoryId,
         userId,
-      );
+      });
       if (category === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
     }
-    const currency = await this.currencyRepository.findByKey(input.currencyKey);
+    const currency = await this.currencyRepository.findByKey({
+      key: input.currencyKey,
+    });
     if (currency === undefined) {
       throw new BadRequestException('Unknown currency key');
     }
-    if (account.currencyId !== currency.id) {
+    if (effectiveAccount.currencyId !== currency.id) {
       throw new BadRequestException(
-        'Transaction currency must match the account currency',
+        'Transaction currency must match the effective account currency',
       );
     }
-    const txnType = await this.transactionTypeRepository.findByKey(
-      input.transactionTypeKey,
-    );
+    const txnType = await this.transactionTypeRepository.findByKey({
+      key: input.transactionTypeKey,
+    });
     if (txnType === undefined) {
       throw new BadRequestException('Unknown transaction type');
     }
@@ -104,7 +149,7 @@ export class CreateTransactionUseCase {
     const draftAfterRules = await this.applyRulesToDraftService.execute({
       userId,
       description: descriptionRaw,
-      accountId: input.accountId,
+      accountId: effectiveAccountIdForRules,
       transactionTypeId: txnType.id,
       categoryIds: uniqueCategoryIds,
       excludeFromStats,
@@ -112,10 +157,10 @@ export class CreateTransactionUseCase {
     excludeFromStats = draftAfterRules.excludeFromStats;
     const mergedCategoryIds: string[] = draftAfterRules.categoryIds;
     for (const categoryId of mergedCategoryIds) {
-      const category = await this.categoryRepository.findAccessibleByUser(
+      const category = await this.categoryRepository.findAccessibleByUser({
         categoryId,
         userId,
-      );
+      });
       if (category === undefined) {
         throw new BadRequestException('Category not found or not accessible');
       }
@@ -128,20 +173,10 @@ export class CreateTransactionUseCase {
       categoryIds: mergedCategoryIds,
       transactionTypeId: txnType.id,
       currencyId: currency.id,
-      accountId: input.accountId,
+      accountId: persistenceAccountId,
+      creditCardId: persistenceCreditCardId,
     };
     const saved = await this.transactionRepository.create(data);
-    const response: CreateTransactionResponseDto =
-      new CreateTransactionResponseDto();
-    response.id = saved.id;
-    response.amount = saved.amount.toPersistenceString();
-    response.description = saved.description;
-    response.recordDate = saved.recordDate.toISOString();
-    response.excludeFromStats = saved.excludeFromStats;
-    response.categoryIds = [...saved.categoryIds];
-    response.transactionTypeId = saved.transactionTypeId;
-    response.currencyId = saved.currencyId;
-    response.accountId = saved.accountId;
-    return response;
+    return mapTransactionToCreateResponseDto(saved);
   }
 }

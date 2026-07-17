@@ -5,6 +5,8 @@ import { RuleBaseModule } from '@rule-base/rule-base.module';
 
 import { RuleTypeModule } from '@rule-type/rule-type.module';
 
+import { CreditCardModule } from '@credit-card/credit-card.module';
+
 import { AccountModule } from '@account/account.module';
 
 import { CategoryModule } from '@category/category.module';
@@ -36,6 +38,7 @@ import { ApplyActiveRulesToTransactionDraftService } from '@transaction/applicat
     CurrencyModule,
     CategoryModule,
     forwardRef(() => AccountModule),
+    forwardRef(() => CreditCardModule),
     RuleTypeModule,
     RuleBaseModule,
     forwardRef(() => {
@@ -62,6 +65,10 @@ import { ApplyActiveRulesToTransactionDraftService } from '@transaction/applicat
     UpdateTransactionUseCase,
     ReadAllTransactionTypesUseCase,
   ],
-  exports: [TRANSACTION_REPOSITORY, TRANSACTION_TYPE_REPOSITORY],
+  exports: [
+    TRANSACTION_REPOSITORY,
+    TRANSACTION_TYPE_REPOSITORY,
+    GetTransactionsUseCase,
+  ],
 })
 export class TransactionModule {}

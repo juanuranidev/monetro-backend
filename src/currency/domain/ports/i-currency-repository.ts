@@ -1,6 +1,8 @@
 import type { Currency } from '@currency/domain/entities/currency';
+import type { CurrencyFindByKeyData } from '@currency/domain/ports/types/currency-find-by-key-data';
 
 export interface ICurrencyRepository {
   findAll(): Promise<readonly Currency[]>;
-  findByKey(key: string): Promise<Currency | undefined>;
+
+  findByKey(data: CurrencyFindByKeyData): Promise<Currency | undefined>;
 }

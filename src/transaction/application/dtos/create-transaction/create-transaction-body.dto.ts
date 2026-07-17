@@ -10,7 +10,6 @@ import {
   IsBoolean,
   MaxLength,
   IsOptional,
-  ArrayMinSize,
 } from 'class-validator';
 
 import { TextFieldLimits } from '@shared/domain/constants/text-field-limits';
@@ -54,15 +53,16 @@ export class CreateTransactionBodyDto {
   @IsBoolean()
   public excludeFromStats?: boolean;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [String],
     format: 'uuid',
-    description: 'At least one category; duplicates are ignored.',
+    description: 'Category IDs; duplicates are ignored. Omit or use [] when none.',
+    default: [],
   })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1, { message: 'At least one categoryId is required' })
   @IsUUID('4', { each: true })
-  public categoryIds!: string[];
+  public categoryIds?: string[];
 
   @ApiProperty({ enum: TransactionTypeKey })
   @IsString()
@@ -74,7 +74,21 @@ export class CreateTransactionBodyDto {
   @Length(3, 3)
   public currencyKey!: string;
 
-  @ApiProperty({ format: 'uuid' })
-  @IsUUID()
-  public accountId!: string;
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Posting leg: direct account movement. Provide exactly one of accountId or creditCardId.',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  public accountId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Posting leg: movement on a credit card belonging to some account (see credit-card routes). Exactly one of accountId or creditCardId.',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  public creditCardId?: string;
 }

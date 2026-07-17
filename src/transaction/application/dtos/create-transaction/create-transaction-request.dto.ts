@@ -20,7 +20,9 @@ export class CreateTransactionRequestDto {
 
   public currencyKey!: string;
 
-  public accountId!: string;
+  public accountId?: string;
+
+  public creditCardId?: string;
 
   /**
    * Maps validated HTTP body plus JWT-derived `userId` into use-case input.
@@ -35,10 +37,11 @@ export class CreateTransactionRequestDto {
     dto.description = body.description;
     dto.recordDate = body.recordDate;
     dto.excludeFromStats = body.excludeFromStats;
-    dto.categoryIds = body.categoryIds;
+    dto.categoryIds = body.categoryIds ?? [];
     dto.transactionTypeKey = body.transactionTypeKey;
     dto.currencyKey = body.currencyKey;
     dto.accountId = body.accountId;
+    dto.creditCardId = body.creditCardId;
     return dto;
   }
 }

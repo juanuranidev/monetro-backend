@@ -1,5 +1,6 @@
+import { User } from '@user/domain/entities/user';
 import { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
-import { User, type UserCreateData } from '@user/domain/entities/user';
+import type { UserCreateData } from '@user/domain/ports/types/user-create-data';
 
 /**
  * Maps between domain User and Postgres-backed persistence (TypeORM).
@@ -14,25 +15,8 @@ export class UserMapper {
       entity.name,
       entity.email,
       entity.password,
-      entity.authId ?? undefined,
       entity.image ?? undefined,
     );
-  }
-
-  /**
-   * Maps a domain user to fields for a Postgres row (TypeORM insert/update).
-   */
-  public static fromDomainToPostgresRow(
-    domain: User,
-  ): Partial<UserTypeOrmEntity> {
-    return {
-      id: domain.id,
-      name: domain.name,
-      email: domain.email,
-      password: domain.passwordHash ?? '',
-      authId: domain.authId ?? null,
-      image: domain.image ?? null,
-    };
   }
 
   /**
@@ -44,8 +28,7 @@ export class UserMapper {
     return {
       name: data.name,
       email: data.email,
-      password: data.passwordHash ?? '',
-      authId: data.authId ?? null,
+      password: data.password ?? '',
       image: data.image ?? null,
     };
   }

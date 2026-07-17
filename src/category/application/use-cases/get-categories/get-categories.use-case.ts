@@ -20,7 +20,9 @@ export class GetCategoriesUseCase {
     input: GetCategoriesRequestDto,
   ): Promise<GetCategoriesResponseDto[]> {
     const categories: readonly Category[] =
-      await this.categoryRepository.listAccessibleByUser(input.userId);
+      await this.categoryRepository.listAccessibleByUser({
+        userId: input.userId,
+      });
     return categories.map((category: Category) =>
       Object.assign(new GetCategoriesResponseDto(), {
         id: category.id,

@@ -34,6 +34,10 @@ import { CreateAccountResponseDto } from '@account/application/dtos/create-accou
 
 import type { RequestUser } from '@core/strategies/jwt.strategy';
 
+import { GetTransactionsUseCase } from '@transaction/application/use-cases/get-transactions/get-transactions.use-case';
+import { GetTransactionsRequestDto } from '@transaction/application/dtos/get-transactions/get-transactions-request.dto';
+import { CreateTransactionResponseDto } from '@transaction/application/dtos/create-transaction/create-transaction-response.dto';
+
 import { CurrentUser } from '@user/infrastructure/decorators/current-user.decorator';
 
 @ApiTags('accounts')
@@ -45,6 +49,7 @@ export class AccountController {
     private readonly getAccountsUseCase: GetAccountsUseCase,
     private readonly getAccountUseCase: GetAccountUseCase,
     private readonly updateAccountUseCase: UpdateAccountUseCase,
+    private readonly getTransactionsUseCase: GetTransactionsUseCase,
   ) {}
 
   @Get()
@@ -55,6 +60,24 @@ export class AccountController {
   ): Promise<GetAccountsResponseDto[]> {
     return this.getAccountsUseCase.execute(
       Object.assign(new GetAccountsRequestDto(), { userId: user.userId }),
+    );
+  }
+
+  @Get(':accountId/transactions')
+  @ApiOperation({
+    summary: 'List transactions for the current user scoped to one account',
+  })
+  @ApiParam({ name: 'accountId', format: 'uuid' })
+  @ApiOkResponse({ type: CreateTransactionResponseDto, isArray: true })
+  public getAccountTransactions(
+    @Param('accountId', new ParseUUIDPipe({ version: '4' })) accountId: string,
+    @CurrentUser() user: RequestUser,
+  ): Promise<CreateTransactionResponseDto[]> {
+    return this.getTransactionsUseCase.execute(
+      Object.assign(new GetTransactionsRequestDto(), {
+        userId: user.userId,
+        accountId,
+      }),
     );
   }
 

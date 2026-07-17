@@ -1,15 +1,22 @@
-import type {
-  Category,
-  CategoryCreateData,
-} from '@category/domain/entities/category';
+import type { Category } from '@category/domain/entities/category';
+import type { CategoryCreateData } from '@category/domain/ports/types/category-create-data';
+import type { CategoryUpdateData } from '@category/domain/ports/types/category-update-data';
+import type { CategoryListByUserIdData } from '@category/domain/ports/types/category-list-by-user-id-data';
+import type { CategorySoftDeleteForUserData } from '@category/domain/ports/types/category-soft-delete-for-user-data';
+import type { CategoryFindAccessibleByUserData } from '@category/domain/ports/types/category-find-accessible-by-user-data';
 
 export interface ICategoryRepository {
   create(data: CategoryCreateData): Promise<Category>;
-  update(category: Category): Promise<Category>;
-  softDeleteByIdForUser(categoryId: string, userId: string): Promise<void>;
+
+  update(data: CategoryUpdateData): Promise<Category>;
+
+  softDeleteByIdForUser(data: CategorySoftDeleteForUserData): Promise<void>;
+
   findAccessibleByUser(
-    categoryId: string,
-    userId: string,
+    data: CategoryFindAccessibleByUserData,
   ): Promise<Category | undefined>;
-  listAccessibleByUser(userId: string): Promise<readonly Category[]>;
+
+  listAccessibleByUser(
+    data: CategoryListByUserIdData,
+  ): Promise<readonly Category[]>;
 }

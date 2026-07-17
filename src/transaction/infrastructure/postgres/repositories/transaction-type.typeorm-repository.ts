@@ -7,6 +7,7 @@ import { TransactionType } from '@transaction/domain/entities/transaction-type';
 import { TransactionTypeMapper } from '@transaction/infrastructure/postgres/mappers/transaction-type.mapper';
 import { TransactionTypeTypeOrmEntity } from '@transaction/infrastructure/postgres/entities/transaction-type.typeorm-entity';
 import type { ITransactionTypeRepository } from '@transaction/domain/ports/i-transaction-type-repository';
+import type { TransactionTypeFindByKeyData } from '@transaction/domain/ports/types/transaction-type-find-by-key-data';
 
 @Injectable()
 export class TransactionTypeTypeOrmRepository implements ITransactionTypeRepository {
@@ -22,8 +23,10 @@ export class TransactionTypeTypeOrmRepository implements ITransactionTypeReposit
     return rows.map((row) => TransactionTypeMapper.fromPostgresToDomain(row));
   }
 
-  public async findByKey(key: string): Promise<TransactionType | undefined> {
-    const normalized: string = key.trim().toLowerCase();
+  public async findByKey(
+    data: TransactionTypeFindByKeyData,
+  ): Promise<TransactionType | undefined> {
+    const normalized: string = data.key.trim().toLowerCase();
     const row: TransactionTypeTypeOrmEntity | null =
       await this.repository.findOne({
         where: { key: normalized },

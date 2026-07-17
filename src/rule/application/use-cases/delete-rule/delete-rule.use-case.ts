@@ -15,14 +15,17 @@ export class DeleteRuleUseCase {
   public async execute(
     input: DeleteRuleRequestDto,
   ): Promise<DeleteRuleResponseDto> {
-    const existing = await this.ruleRepository.findOwnedByUser(
-      input.ruleId,
-      input.userId,
-    );
+    const existing = await this.ruleRepository.findOwnedByUser({
+      ruleId: input.ruleId,
+      userId: input.userId,
+    });
     if (existing === undefined) {
       throw new NotFoundException('Rule not found');
     }
-    await this.ruleRepository.deleteOwned(input.ruleId, input.userId);
-    return new DeleteRuleResponseDto();
+    await this.ruleRepository.deleteOwned({
+      ruleId: input.ruleId,
+      userId: input.userId,
+    });
+    return Object.assign(new DeleteRuleResponseDto(), {});
   }
 }

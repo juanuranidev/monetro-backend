@@ -1,8 +1,6 @@
+import { Category } from '@category/domain/entities/category';
 import { CategoryTypeOrmEntity } from '@category/infrastructure/postgres/entities/category.typeorm-entity';
-import {
-  Category,
-  type CategoryCreateData,
-} from '@category/domain/entities/category';
+import type { CategoryCreateData } from '@category/domain/ports/types/category-create-data';
 
 import type { UserTypeOrmEntity } from '@user/infrastructure/postgres/entities/user.typeorm-entity';
 
